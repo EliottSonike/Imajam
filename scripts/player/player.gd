@@ -29,3 +29,7 @@ func set_lock(reason: StringName, locked: bool) -> void:
 
 func is_locked() -> bool:
 	return false
+
+
+func make_view_current() -> void:
+	pass

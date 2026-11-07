@@ -15,6 +15,10 @@ var has_map_memory := false
 var power_on := true
 var vision_impaired := false
 
+
+func _ready() -> void:
+	reset()
+	
 # Remettre l’état de départ. Le joueur a le gun dès le début
 func reset() -> void:
 	items = {ITEM_GUN: 1}
@@ -30,34 +34,56 @@ func add_item(id: StringName, count := 1) -> void:
 	items[id] =  items.get(id,0) + count
 	Events.item_picked.emit(id)
 
-
+# Renvoyer vrai si l'item est détenu
 func has_item(id: StringName) -> bool:
-	return false
+	return items.get(id,0) > 0
 
+func set_vision_impaired(value: bool) -> void:
+	vision_impaired = value
+	Events.vision_changed.emit(value)
 
 func use_meds() -> bool:
-	return false
+	if not(has_item(ITEM_MEDS)) or not(vision_impaired):
+		return false
+	items[ITEM_MEDS] -= 1
+	set_vision_impaired(false)
+	return true 
 
-
+# ramasse le journal
 func pick_journal(index: int) -> void:
-	pass
-
+	if index < 0 or index >= JOURNAL_COUNT : 
+		return
+	journals[index] = true
+	Events.journal_picked.emit(index)
 
 func journal_count() -> int:
-	return 0
+	return journals.count(true)
 
 
 func memorize_map() -> void:
-	pass
+	has_map_memory = true
+	Events.map_memorized.emit()
 
 
 func set_power(on: bool) -> void:
-	pass
+	if power_on == on : 
+		return
+	else :
+		power_on = on
+		Events.power_changed.emit(on)
+	
 
 
-func resolve_prisoner(prisoner_id: int, killed: bool) -> void:
-	pass
+func resolve_prisoner(_prisoner_id: int, killed: bool) -> void:
+	if killed :
+		has_killed = true
+			
 
 
 func compute_ending() -> Ending:
-	return Ending.NONE
+	if journal_count() == JOURNAL_COUNT:
+		return Ending.TRUAND
+	if has_killed :
+		return Ending.BRUTE
+	else : 
+		return Ending.BON

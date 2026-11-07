@@ -6,13 +6,13 @@ extends StaticBody3D
 @export var enabled := true
 
 
-func can_interact(player: Player) -> bool:
-	return false
+func can_interact(_player: Player) -> bool:
+	return enabled
 
 
 func get_prompt() -> String:
-	return ""
+	return "[E] " + prompt
 
 
-func interact(player: Player) -> void:
+func interact(_player: Player) -> void:
 	pass
