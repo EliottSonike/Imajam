@@ -27,9 +27,8 @@ func reset() -> void:
 
 # Ajouter l’item, puis émettre item_picked
 func add_item(id: StringName, count := 1) -> void:
-	item = items.get(id,0)
-	if id == null :
-		return 0
+	items[id] =  items.get(id,0) + count
+	Events.item_picked.emit(id)
 
 
 func has_item(id: StringName) -> bool:
