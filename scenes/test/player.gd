@@ -1,20 +1,14 @@
 extends CharacterBody3D
 
-# En Godot 4, on écrit @export et @onready avec un @
-@export var mouse_sensitivity = 0.002 # Les valeurs de souris sont plus petites en Godot 4
+@export var mouse_sensitivity = 0.002 
 
-# Vos nœuds enfants (assurez-vous qu'ils s'appellent bien ainsi et sont ENFANTS du joueur)
-@onready var head = $Wallis/CharacterBody3D
-@onready var camera = $Wallis/CharacterBody3D/Camera3D
-
-func _ready():
-	# Capture la souris pour la rendre invisible et verrouillée au centre
-	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+@onready var head = $Head
+@onready var camera = $Head/Camera3D
 
 func _unhandled_input(event):
 	if event is InputEventMouseMotion:
-		rotate_y(deg_to_rad(-event.relative.x * mouse_sensitivity))
-		head.rotate_x(deg_to_rad(-event.relative.y * mouse_sensitivity))
+		rotate_y(-event.relative.x * mouse_sensitivity)
+		head.rotate_x(-event.relative.y * mouse_sensitivity)
 		head.rotation.x = clamp(head.rotation.x, deg_to_rad(-89), deg_to_rad(89))
 
 

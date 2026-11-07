@@ -4,3 +4,34 @@
 
 [node name="Ui" type="CanvasLayer" unique_id=978964736]
 script = ExtResource("1_nt7q6")
+
+[node name="Panel" type="Panel" parent="." unique_id=70184129]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 580.0
+offset_bottom = 380.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 4
+metadata/_edit_use_anchors_ = true
+
+[node name="RichTextLabel" type="RichTextLabel" parent="Panel" unique_id=615030733]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = 580.0
+offset_bottom = 320.0
+text = "test"
+
+[node name="fermerBoutton" type="Button" parent="Panel" unique_id=1708643801]
+layout_mode = 0
+offset_left = 250.0
+offset_top = 340.0
+offset_right = 315.0
+offset_bottom = 371.0
+text = "Fermer"
