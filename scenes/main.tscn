@@ -1,30 +1,36 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene format=3 uid="uid://bxh6bqyadwjj7"]
 
-[ext_resource type="Script" path="res://scripts/game/turn_manager.gd" id="1"]
-[ext_resource type="Script" path="res://scripts/cameras/camera_system.gd" id="2"]
-[ext_resource type="Script" path="res://scripts/world/power_grid.gd" id="3"]
-[ext_resource type="Script" path="res://scripts/ui/ui_root.gd" id="4"]
+[ext_resource type="Script" uid="uid://bvdvhf4l4ipnn" path="res://scripts/game/turn_manager.gd" id="1"]
+[ext_resource type="PackedScene" uid="uid://dfocrrvqf6nxu" path="res://scenes/player.tscn" id="1_tipki"]
+[ext_resource type="Script" uid="uid://cl4g6mnwxt1kh" path="res://scripts/cameras/camera_system.gd" id="2"]
+[ext_resource type="Script" uid="uid://dpbrrxll6ywov" path="res://scripts/world/power_grid.gd" id="3"]
+[ext_resource type="PackedScene" uid="uid://b3qo55377yqgh" path="res://scenes/level.tscn" id="5_85g3d"]
+[ext_resource type="PackedScene" uid="uid://c7tp8kt2sphlh" path="res://scenes/ui.tscn" id="6_choun"]
+[ext_resource type="PackedScene" uid="uid://cx8ibjw75madh" path="res://scenes/props.tscn" id="7_ya4ey"]
+[ext_resource type="PackedScene" uid="uid://c88jyqqeyur4k" path="res://scenes/cameras.tscn" id="8_eb6dy"]
 
-[node name="Main" type="Node3D"]
+[node name="Main" type="Node3D" unique_id=100031218]
 
-[node name="Level" type="Node3D" parent="."]
+[node name="Player" parent="." unique_id=1665888107 instance=ExtResource("1_tipki")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 
-[node name="SecurityCameras" type="Node3D" parent="."]
+[node name="Prisoners" type="Node3D" parent="." unique_id=373514444]
 
-[node name="Props" type="Node3D" parent="."]
+[node name="Systems" type="Node" parent="." unique_id=134388098]
 
-[node name="Prisoners" type="Node3D" parent="."]
-
-[node name="Systems" type="Node" parent="."]
-
-[node name="TurnManager" type="Node" parent="Systems"]
+[node name="TurnManager" type="Node" parent="Systems" unique_id=2115943061]
 script = ExtResource("1")
 
-[node name="CameraSystem" type="Node" parent="Systems"]
+[node name="CameraSystem" type="Node" parent="Systems" unique_id=364023903]
 script = ExtResource("2")
 
-[node name="PowerGrid" type="Node" parent="Systems"]
+[node name="PowerGrid" type="Node" parent="Systems" unique_id=1571564124]
 script = ExtResource("3")
 
-[node name="UI" type="CanvasLayer" parent="."]
-script = ExtResource("4")
+[node name="Level" parent="." unique_id=1209498660 instance=ExtResource("5_85g3d")]
+
+[node name="Ui" parent="." unique_id=978964736 instance=ExtResource("6_choun")]
+
+[node name="Props" parent="." unique_id=458627321 instance=ExtResource("7_ya4ey")]
+
+[node name="Cameras" parent="." unique_id=2016051282 instance=ExtResource("8_eb6dy")]

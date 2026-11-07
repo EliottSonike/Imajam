@@ -1,14 +1,14 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3 uid="uid://dfocrrvqf6nxu"]
 
-[ext_resource type="Script" path="res://scripts/player/player.gd" id="1"]
+[ext_resource type="Script" uid="uid://bppi3shykmuju" path="res://scripts/player/player.gd" id="1"]
 
-[node name="Player" type="CharacterBody3D"]
+[node name="Player" type="CharacterBody3D" unique_id=163935158]
 script = ExtResource("1")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=2135955955]
 
-[node name="Head" type="Node3D" parent="."]
+[node name="Head" type="Node3D" parent="." unique_id=1829733631]
 
-[node name="Camera3D" type="Camera3D" parent="Head"]
+[node name="Camera3D" type="Camera3D" parent="Head" unique_id=789119588]
 
-[node name="InteractRay" type="RayCast3D" parent="Head/Camera3D"]
+[node name="InteractRay" type="RayCast3D" parent="Head/Camera3D" unique_id=1149061045]
