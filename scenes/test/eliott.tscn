@@ -1,3 +1,51 @@
 [gd_scene format=3 uid="uid://caf20c0eqgmeq"]
 
-[node name="Eliott" type="CanvasLayer" unique_id=1877119739]
+[ext_resource type="Script" uid="uid://7rb41jrcf1yw" path="res://scenes/test/eliott_test.gd" id="1_test"]
+[ext_resource type="Script" uid="uid://i7vtpofiyvan" path="res://scripts/cameras/security_camera.gd" id="2_cam"]
+[ext_resource type="Script" uid="uid://cl4g6mnwxt1kh" path="res://scripts/cameras/camera_system.gd" id="3_sys"]
+[ext_resource type="Script" uid="uid://bvdvhf4l4ipnn" path="res://scripts/game/turn_manager.gd" id="4_turn"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_y2pii"]
+sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
+ground_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
+
+[sub_resource type="Sky" id="Sky_dvwh7"]
+sky_material = SubResource("ProceduralSkyMaterial_y2pii")
+
+[sub_resource type="Environment" id="Environment_0ardq"]
+background_mode = 2
+sky = SubResource("Sky_dvwh7")
+glow_enabled = true
+
+[node name="TestEliott" type="Node3D" unique_id=1884445448]
+script = ExtResource("1_test")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=969478233]
+environment = SubResource("Environment_0ardq")
+
+[node name="Sol" type="CSGBox3D" parent="." unique_id=1000219530]
+size = Vector3(10, 0.2, 10)
+
+[node name="Cube" type="CSGBox3D" parent="." unique_id=1466954756]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1659381453]
+transform = Transform3D(1, 0, 0, 0, 0.7071, 0.7071, 0, -0.7071, 0.7071, 0, 5, 0)
+
+[node name="CamA" type="Camera3D" parent="." unique_id=490393061]
+transform = Transform3D(0.7071, 0.3226, -0.6292, 0, 0.8899, 0.4562, 0.7071, -0.3226, 0.6292, -4, 3.5, 4)
+script = ExtResource("2_cam")
+camera_id = &"cam_a"
+label = "Caméra A"
+
+[node name="CamB" type="Camera3D" parent="." unique_id=600104710]
+transform = Transform3D(-0.7071, -0.3226, 0.6292, 0, 0.8899, 0.4562, -0.7071, 0.3226, -0.6292, 4, 3.5, -4)
+script = ExtResource("2_cam")
+camera_id = &"cam_b"
+label = "Caméra B"
+
+[node name="CameraSystem" type="Node" parent="." unique_id=1510096391]
+script = ExtResource("3_sys")
+
+[node name="TurnManager" type="Node" parent="."]
+script = ExtResource("4_turn")
