@@ -1,14 +1,25 @@
-[gd_scene format=3 uid="uid://dfocrrvqf6nxu"]
+[gd_scene format=3 uid="uid://ljju3hj10g8m"]
 
-[ext_resource type="Script" uid="uid://bppi3shykmuju" path="res://scripts/player/player.gd" id="1"]
+[ext_resource type="Script" uid="uid://c2icc734y63wp" path="res://scenes/test/player.gd" id="1_0xn31"]
 
-[node name="Player" type="CharacterBody3D" unique_id=163935158]
-script = ExtResource("1")
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_3mu4w"]
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=2135955955]
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_3mu4w"]
 
-[node name="Head" type="Node3D" parent="." unique_id=1829733631]
+[node name="Player" type="CharacterBody3D" unique_id=1357680376]
+script = ExtResource("1_0xn31")
 
-[node name="Camera3D" type="Camera3D" parent="Head" unique_id=789119588]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1711090995]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+mesh = SubResource("CapsuleMesh_3mu4w")
 
-[node name="InteractRay" type="RayCast3D" parent="Head/Camera3D" unique_id=1149061045]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=2028872988]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+shape = SubResource("CapsuleShape3D_3mu4w")
+debug_color = Color(0.3974303, 0.5802213, 0.52824265, 0.41960785)
+
+[node name="Head" type="Node3D" parent="." unique_id=1111712775]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+
+[node name="Camera3D" type="Camera3D" parent="Head" unique_id=1988948871]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5)

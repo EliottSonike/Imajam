@@ -1,17 +1,16 @@
 [gd_scene format=3 uid="uid://e47rneejxv83"]
 
-[ext_resource type="Script" uid="uid://c2icc734y63wp" path="res://scenes/test/player.gd" id="1_syrfs"]
+[ext_resource type="PackedScene" uid="uid://c7tp8kt2sphlh" path="res://scenes/ui.tscn" id="1_t88c4"]
+[ext_resource type="PackedScene" uid="uid://ljju3hj10g8m" path="res://scenes/player.tscn" id="2_t88c4"]
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_3mu4w"]
 
 [sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_tuex2"]
 data = PackedVector3Array(1, 0, 1, -1, 0, 1, 1, 0, -1, -1, 0, 1, -1, 0, -1, 1, 0, -1)
 
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_3mu4w"]
-
-[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_3mu4w"]
-
 [node name="Wallis" type="Node3D" unique_id=794454125]
+
+[node name="Ui" parent="." unique_id=978964736 instance=ExtResource("1_t88c4")]
 
 [node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=986267259]
 transform = Transform3D(10, 0, 0, 0, 10, 0, 0, 0, 10, 0, 0, 0)
@@ -22,24 +21,7 @@ mesh = SubResource("PlaneMesh_3mu4w")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" unique_id=576008185]
 shape = SubResource("ConcavePolygonShape3D_tuex2")
 
-[node name="CharacterBody3D" type="CharacterBody3D" parent="." unique_id=1013101306]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.181203, 0)
-script = ExtResource("1_syrfs")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="CharacterBody3D" unique_id=1045007184]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
-mesh = SubResource("CapsuleMesh_3mu4w")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="CharacterBody3D" unique_id=122128946]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
-shape = SubResource("CapsuleShape3D_3mu4w")
-debug_color = Color(0.3974303, 0.5802213, 0.52824265, 0.41960785)
-
-[node name="Head" type="Node3D" parent="CharacterBody3D" unique_id=1158515997]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
-
-[node name="Camera3D" type="Camera3D" parent="CharacterBody3D/Head" unique_id=1495475530]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5)
-
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1961847719]
 transform = Transform3D(1, 0, 0, 0, 0.83990675, 0.54273075, 0, -0.54273075, 0.83990675, 4.2411404, 7.909566, 10.366197)
+
+[node name="Player" parent="." unique_id=1357680376 instance=ExtResource("2_t88c4")]
