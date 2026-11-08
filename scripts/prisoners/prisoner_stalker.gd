@@ -154,14 +154,14 @@ func screamer_at(player: Player) -> void:
 	_play(&"idle")
 	player.set_lock(&"encounter", true)
 	Sfx.play_at("breath", global_position + Vector3.UP * 1.6, -2.0, 2.0)  # un souffle dans le dos
-	await get_tree().create_timer(1.1).timeout
+	await get_tree().create_timer(1.1, false).timeout
 	_play(&"attaque", 1.3, 0.05)
 	player.face_point(global_position + Vector3.UP * 1.5, 0.14)  # il se retourne d'un coup
 	Sfx.play("screamer", 2.0)
 	Events.screamer.emit()
 	Events.flash.emit(Color(1.0, 1.0, 1.0, 0.9))
 	Events.shake.emit(1.4)
-	await get_tree().create_timer(0.8).timeout
+	await get_tree().create_timer(0.8, false).timeout
 	Events.encounter_requested.emit(self)
 
 

@@ -23,6 +23,7 @@ var _clock := 2.0 * 3600.0 + 13.0 * 60.0  # l'action commence à 02:13
 
 func _ready() -> void:
 	UiTheme.full_rect(self)
+	process_mode = Node.PROCESS_MODE_PAUSABLE  # figé pendant la pause (l'UI racine tourne toujours)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 	_crosshair = ColorRect.new()

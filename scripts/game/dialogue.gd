@@ -20,7 +20,7 @@ static func say(key: StringName) -> void:
 			return
 		var entry: Array = lines[i]
 		var duration := line(entry[0], entry[1], voice_id(key, i))
-		await tree.create_timer(duration).timeout
+		await tree.create_timer(duration, false).timeout
 	if mine == _sequence:
 		_speaking = false
 

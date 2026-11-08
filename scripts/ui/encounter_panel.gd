@@ -12,6 +12,7 @@ var _hint: Label
 
 func _ready() -> void:
 	UiTheme.full_rect(self)
+	process_mode = Node.PROCESS_MODE_PAUSABLE  # figé pendant la pause (l'UI racine tourne toujours)
 	visible = false
 	mouse_filter = Control.MOUSE_FILTER_STOP
 
@@ -114,7 +115,7 @@ func _on_choice(killed: bool) -> void:
 	close()
 	GameState.resolve_prisoner(id, killed)
 	Events.encounter_resolved.emit(id, killed)
-	await get_tree().create_timer(1.5).timeout
+	await get_tree().create_timer(1.5, false).timeout
 	GameState.set_vision_impaired(true)
 	var p := get_tree().get_first_node_in_group(&"player") as Player
 	if p:

@@ -32,7 +32,7 @@ func _on_power_changed(on: bool) -> void:
 	var pattern := [true, false, true, false, false, true, false] if not on else [false, true, false, true, false, true]
 	for state in pattern:
 		_set_lights(state)
-		await get_tree().create_timer(randf_range(0.05, 0.14)).timeout
+		await get_tree().create_timer(randf_range(0.05, 0.14), false).timeout
 	_set_lights(on)
 	if world_environment and world_environment.environment:
 		world_environment.environment.ambient_light_energy = _ambient_energy if on else 0.0

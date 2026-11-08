@@ -89,7 +89,7 @@ func attack_player() -> void:
 	if attack_line != &"":
 		_play(&"idle")
 		await Dialogue.say(attack_line)
-		await get_tree().create_timer(0.25).timeout
+		await get_tree().create_timer(0.25, false).timeout
 		if resolved:
 			return
 	var to_me := global_position - player.global_position
@@ -106,7 +106,7 @@ func attack_player() -> void:
 	Events.shake.emit(1.0)
 	Events.flash.emit(Color(0.6, 0.0, 0.0, 0.55))
 	player.face_point(global_position + Vector3.UP * 1.5, 0.15)
-	await get_tree().create_timer(0.45).timeout
+	await get_tree().create_timer(0.45, false).timeout
 	Events.encounter_requested.emit(self)
 
 

@@ -14,6 +14,7 @@ var _waiting := false
 
 func _ready() -> void:
 	UiTheme.full_rect(self)
+	process_mode = Node.PROCESS_MODE_PAUSABLE  # figé pendant la pause (l'UI racine tourne toujours)
 	visible = false
 	mouse_filter = Control.MOUSE_FILTER_IGNORE  # on voit le détenu au-dessus du panneau
 
@@ -94,12 +95,12 @@ func _on_answer(a: Array, k: int) -> void:
 	_line.text = ""
 	var t_you := Sfx.play_voice(&"joueur", "negociation_%d_reponse_%d" % [n, k])
 	if t_you > 0.0:
-		await get_tree().create_timer(t_you + 0.2).timeout
+		await get_tree().create_timer(t_you + 0.2, false).timeout
 	if not visible:
 		return
 	_line.text = "« %s »" % a[2]
 	var t_react := Sfx.play_voice(&"detenu_2", "negociation_%d_reaction_%d" % [n, k])
-	await get_tree().create_timer(maxf(2.6, t_react + 0.4)).timeout
+	await get_tree().create_timer(maxf(2.6, t_react + 0.4), false).timeout
 	if not visible:
 		return
 	_step += 1
@@ -116,7 +117,7 @@ func _finish() -> void:
 	var t_end := Sfx.play_voice(&"detenu_2", "negociation_reussie" if success else "negociation_ratee")
 	if not success and t_end == 0.0:
 		Sfx.play("scream", -12.0, 0.9)
-	await get_tree().create_timer(maxf(3.0, t_end + 0.4)).timeout
+	await get_tree().create_timer(maxf(3.0, t_end + 0.4), false).timeout
 	hide()
 	var id := _prisoner.prisoner_id
 	_prisoner = null

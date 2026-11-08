@@ -104,7 +104,7 @@ func play_voice(speaker: StringName, id: String) -> float:
 		return 0.0
 	if _voice == null:
 		_voice = AudioStreamPlayer.new()
-		_voice.process_mode = Node.PROCESS_MODE_ALWAYS
+		_voice.process_mode = Node.PROCESS_MODE_PAUSABLE  # la pause coupe aussi les répliques
 		add_child(_voice)
 	_voice.stream = s
 	_voice.play()

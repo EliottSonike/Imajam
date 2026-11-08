@@ -66,20 +66,21 @@ func _enter(p: Phase) -> void:
 	Events.phase_changed.emit(p)
 	match p:
 		Phase.INTRO:
+			# le 1 est déjà caché dans son angle mort : quand le téléphone parle de lui, sa cellule paraît vide
+			if prisoner_1:
+				prisoner_1.start_escape()
 			Events.fade_requested.emit(false, 2.0)
-			await get_tree().create_timer(1.2).timeout
+			await get_tree().create_timer(1.2, false).timeout
 			Events.show_document.emit(Texts.INTRO_TITLE, Texts.INTRO_BODY)
 			await Events.document_closed
 			Sfx.play("phone_ring", -4.0)
-			await get_tree().create_timer(2.2).timeout
+			await get_tree().create_timer(2.2, false).timeout
 			await Dialogue.say(&"intro")  # le seul appel du jeu
 			if phase != Phase.INTRO:
 				return
 			_objective(&"intro")
 			_enter(Phase.TURN_1)
 		Phase.TURN_1:
-			if prisoner_1:
-				prisoner_1.start_escape()
 			_next_turn_on_cameras = -1
 			# le joueur est peut-être déjà devant les écrans
 			var sys := get_tree().get_first_node_in_group(&"camera_system") as CameraSystem
@@ -103,16 +104,16 @@ func _enter(p: Phase) -> void:
 				_checkpoint_yaw = player.rotation.y
 			Sfx.play("power_down")
 			GameState.set_power(false)
-			await get_tree().create_timer(1.2).timeout
+			await get_tree().create_timer(1.2, false).timeout
 			Dialogue.say(&"blackout")
 			# carte déjà retenue (post-it) : pas besoin d'aller la chercher
 			_objective(&"blackout_carte" if GameState.has_map else &"blackout")
-			await get_tree().create_timer(3.0).timeout
+			await get_tree().create_timer(3.0, false).timeout
 			if prisoner_3 and not prisoner_3.resolved and not GameState.power_on:
 				prisoner_3.start_stalking()
 		Phase.ENDING:
 			Events.fade_requested.emit(true, 2.5)
-			await get_tree().create_timer(2.8).timeout
+			await get_tree().create_timer(2.8, false).timeout
 			Events.ending_reached.emit(GameState.compute_ending())
 
 
@@ -142,7 +143,7 @@ func _on_camera_viewed(camera_id: StringName) -> void:
 
 
 func _on_encounter_resolved(prisoner_id: int, killed: bool) -> void:
-	await get_tree().create_timer(2.0).timeout
+	await get_tree().create_timer(2.0, false).timeout
 	match prisoner_id:
 		1:
 			Dialogue.say(&"turn_1_done")
@@ -192,7 +193,7 @@ func _on_prisoner_2_calmed() -> void:
 	if phase != Phase.TURN_2:
 		return
 	GameState.resolve_prisoner(2, false)
-	await get_tree().create_timer(1.5).timeout
+	await get_tree().create_timer(1.5, false).timeout
 	Dialogue.say(&"turn_2_calme")
 	_objective(&"turn_2_done")
 	_next_turn_on_cameras = 3
@@ -238,7 +239,7 @@ func _on_player_caught() -> void:
 	Sfx.play("screamer", 0.0, 0.8)
 	Events.shake.emit(1.5)
 	Events.fade_requested.emit(true, 0.4)
-	await get_tree().create_timer(1.6).timeout
+	await get_tree().create_timer(1.6, false).timeout
 	player.teleport(_checkpoint_pos, _checkpoint_yaw)
 	GameState.set_vision_impaired(true)
 	if prisoner_3:
