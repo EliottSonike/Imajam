@@ -12,7 +12,12 @@ enum State { IDLE, WAITING, ESCAPING, REFECTOIRE, TALKING, CALM }
 @export var cell_door: CellDoor
 @export var kitchen_tile := Vector2i(22, 3)
 @export var refectoire_tile := Vector2i(16, 3)
-@export var run_speed := 3.0
+@export var run_speed := 2.4
+## Arrêts du trajet vers les cuisines, chacun bien visible sur une caméra (Bloc B, Couloir central).
+@export var route_stops: Array[Vector3] = [Vector3(39.9, 0.0, -8.5), Vector3(28.6, 0.0, -17.5)]
+@export var route_pauses: Array[float] = [2.2, 1.4]
+## Temps passé à fouiller les cuisines (CAM 15) avant de ressortir avec le couteau.
+@export var kitchen_search := 3.6
 @export var talk_distance := 5.0
 @export var max_wait := 40.0
 ## Temps pendant lequel le joueur doit l'avoir vu sur CAM 09 avant qu'il force sa porte
@@ -26,7 +31,12 @@ var state := State.IDLE
 var _wait_left := 0.0
 var _watched := 0.0
 var _curled := true
-var _leg := 0
+var _leg := 0  # 0 : vers les cuisines, 1 : couteau en main, vers le réfectoire
+var _stops: Array[Vector3] = []
+var _stop_i := 0
+var _pause := 0.0
+var _searching := false
+var _spotted_kitchen := false
 var _spotted_route := false
 var _spotted_refectoire := false
 var _agitation := 1.0
@@ -69,18 +79,7 @@ func _physics_process(delta: float) -> void:
 			elif _wait_left <= 0.0:
 				_break_out(_watched > 0.0)
 		State.ESCAPING:
-			if _follow_path(delta, run_speed):
-				if _leg == 0:
-					_leg = 1
-					_knife.visible = true  # il a pris un couteau aux cuisines
-					_set_path(PrisonNav.find_path(global_position, PrisonNav.tile_to_world(refectoire_tile)), 1)
-				else:
-					state = State.REFECTOIRE
-					_moving = false
-					arrived.emit()
-			elif not _spotted_route and _update_seen(delta):
-				_spotted_route = true
-				spotted.emit(&"route")
+			_escape_step(delta)
 			if _leg == 1:
 				_check_player_close()
 		State.REFECTOIRE:
@@ -96,8 +95,71 @@ func _break_out(seen: bool) -> void:
 	_spotted_route = seen
 	if cell_door:
 		cell_door.open()
-	_set_path(PrisonNav.find_path(global_position, PrisonNav.tile_to_world(kitchen_tile)), 1)
+	# trajet : arrêts devant les caméras, puis les cuisines, puis le réfectoire
+	_stops = route_stops.duplicate()
+	_stops.append(PrisonNav.tile_to_world(kitchen_tile))
+	_stops.append(PrisonNav.tile_to_world(refectoire_tile))
+	_stop_i = 0
+	_pause = 0.0
+	_go_to_stop()
 	escaped.emit(seen)
+
+
+## Le détecteur de mouvement le signale pendant toute sa fuite, arrêts compris.
+func shows_motion() -> bool:
+	return not resolved and not _busy and state in [State.ESCAPING, State.REFECTOIRE]
+
+
+func _go_to_stop() -> void:
+	_set_path(PrisonNav.find_path(global_position, _stops[_stop_i]), 1)
+
+
+func _escape_step(delta: float) -> void:
+	var seen := _update_seen(delta)
+	if seen and not _spotted_route:
+		_spotted_route = true
+		spotted.emit(&"route")
+	if _searching and seen and not _spotted_kitchen:
+		_spotted_kitchen = true
+		spotted.emit(&"cuisine")
+	if _pause > 0.0:
+		_pause -= delta
+		_moving = false
+		if _searching and _pause <= kitchen_search * 0.4 and not _knife.visible:
+			_knife.visible = true  # il a trouvé un couteau
+			Sfx.play_at("pickup", global_position + Vector3.UP, -4.0, 2.0)
+		if _pause <= 0.0:
+			_searching = false
+			_stop_i += 1
+			_go_to_stop()
+		return
+	if not _follow_path(delta, run_speed):
+		return
+	var last := _stops.size() - 1
+	if _stop_i == last:
+		state = State.REFECTOIRE
+		_moving = false
+		arrived.emit()
+	elif _stop_i == last - 1:
+		# cuisines : il fouille, dos à la porte, puis repart couteau en main
+		_leg = 1
+		_searching = true
+		_pause = kitchen_search
+		rotation.y += PI * 0.6
+	else:
+		_pause = route_pauses[_stop_i] if _stop_i < route_pauses.size() else 1.0
+		# il lève la tête vers la caméra la plus proche (il parle aux caméras)
+		var cam := _nearest_camera()
+		if cam:
+			face_instant(cam.global_position)
+
+
+func _nearest_camera() -> SecurityCamera:
+	var best: SecurityCamera = null
+	for c in get_tree().get_nodes_in_group(&"security_cameras"):
+		if camera_sees(c) and (best == null or c.global_position.distance_to(global_position) < best.global_position.distance_to(global_position)):
+			best = c
+	return best
 
 
 func _check_player_close() -> void:
@@ -141,7 +203,7 @@ func _on_talk_finished(id: int, success: bool) -> void:
 
 
 func _process(delta: float) -> void:
-	_pose = &"agite" if state in [State.WAITING, State.REFECTOIRE, State.TALKING] else &""
+	_pose = &"agite" if state in [State.WAITING, State.REFECTOIRE, State.TALKING] or (state == State.ESCAPING and _pause > 0.0) else &""
 	if _curled and state == State.IDLE:
 		_pose = &"assis_boucle"
 	super._process(delta)

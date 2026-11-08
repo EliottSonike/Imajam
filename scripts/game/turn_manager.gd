@@ -112,8 +112,16 @@ func _enter(p: Phase) -> void:
 			await get_tree().create_timer(1.2, false).timeout
 			Events.show_document.emit(Texts.INTRO_TITLE, Texts.INTRO_BODY)
 			await Events.document_closed
-			Sfx.play("phone_ring", -4.0)
-			await get_tree().create_timer(2.2, false).timeout
+			# le téléphone sonne jusqu'à ce que le joueur aille décrocher
+			var tel := get_tree().get_first_node_in_group(&"telephone") as Telephone
+			if tel:
+				_objective(&"telephone")
+				tel.ring()
+				await tel.answered
+				await get_tree().create_timer(0.6, false).timeout
+			else:
+				Sfx.play("phone_ring", -4.0)
+				await get_tree().create_timer(2.2, false).timeout
 			# le seul appel du jeu (il ne dit plus par quelle cellule commencer)
 			await Dialogue.say(&"intro")
 			if phase != Phase.INTRO:
@@ -135,9 +143,20 @@ func _enter(p: Phase) -> void:
 			if prisoner_3 and not prisoner_3.resolved and not GameState.power_on:
 				prisoner_3.start_stalking()
 		Phase.ENDING:
-			Events.fade_requested.emit(true, 2.5)
-			await get_tree().create_timer(2.8, false).timeout
-			Events.ending_reached.emit(GameState.compute_ending())
+			# il se tourne vers les écrans, une dernière pensée, puis le noir
+			var ending := GameState.compute_ending()
+			var player := _player()
+			var desk := get_tree().get_first_node_in_group(&"security_desk") as Node3D
+			if player:
+				player.set_lock(&"ending", true)
+				if desk:
+					player.face_point(desk.global_position + Vector3(0.0, 0.5, 0.0), 1.2)
+			await get_tree().create_timer(1.4, false).timeout
+			Events.objective_changed.emit("")
+			await Dialogue.say([&"", &"fin_bon", &"fin_brute", &"fin_truand"][ending])
+			Events.fade_requested.emit(true, 3.0)
+			await get_tree().create_timer(3.3, false).timeout
+			Events.ending_reached.emit(ending)
 
 
 ## Passe au tour i (le détenu order[i]). L'évasion démarre avec _start_turn().
@@ -274,6 +293,8 @@ func _on_prisoner_2_spotted(where: StringName) -> void:
 		return
 	if where == &"route":
 		_say_p2_exit()
+	elif where == &"cuisine":
+		Dialogue.say_after(&"turn_2_cuisine")
 	else:
 		Dialogue.say_after(&"turn_2_refectoire")  # sans couper « il a forcé sa porte »
 		_objective(&"turn_2_refectoire")
@@ -294,7 +315,7 @@ func _on_prisoner_2_arrived() -> void:
 func _on_prisoner_2_calmed() -> void:
 	if _current != 2:
 		return
-	GameState.resolve_prisoner(2, false)
+	GameState.resolve_prisoner(2, false, true)
 	await get_tree().create_timer(1.5, false).timeout
 	Dialogue.say(&"turn_2_calme")
 	_turn_finished(2)
@@ -460,7 +481,13 @@ func _prisoner(id: int) -> Prisoner:
 	return null
 
 
+var _last_objective: StringName = &""
+
+
 func _objective(key: StringName) -> void:
+	if key == _last_objective:
+		return  # pas deux fois le même objectif d'affilée
+	_last_objective = key
 	Events.objective_changed.emit(Texts.OBJECTIVES.get(key, ""))
 
 

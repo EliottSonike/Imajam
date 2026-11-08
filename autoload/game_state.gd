@@ -9,6 +9,10 @@ const ITEM_MEDS := &"meds"
 const JOURNAL_COUNT := 4
 ## Deux vies : au premier coup la vision se trouble, au deuxième (sans médicaments entre-temps) il meurt.
 const MAX_HEALTH := 2
+const OUTCOME_TASER := "maîtrisé (taser)"
+const OUTCOME_KILLED := "abattu"
+const OUTCOME_CALMED := "calmé, sans arme"
+const PROGRESS_PATH := "user://progression.cfg"
 
 var items: Dictionary = {}
 var journals: Array[bool] = []
@@ -17,6 +21,9 @@ var has_map := false
 var power_on := true
 var vision_impaired := false
 var health := MAX_HEALTH
+## Sort de chaque détenu (id -> OUTCOME_*), pour le rapport de fin.
+var outcomes: Dictionary = {}
+var _start_ms := 0
 
 
 func _ready() -> void:
@@ -32,6 +39,8 @@ func reset() -> void:
 	power_on = true
 	vision_impaired = false
 	health = MAX_HEALTH
+	outcomes = {}
+	_start_ms = Time.get_ticks_msec()
 
 # Ajouter l'item, puis émettre item_picked
 func add_item(id: StringName, count := 1) -> void:
@@ -95,7 +104,8 @@ func set_power(on: bool) -> void:
 	
 
 
-func resolve_prisoner(_prisoner_id: int, killed: bool) -> void:
+func resolve_prisoner(prisoner_id: int, killed: bool, calmed := false) -> void:
+	outcomes[prisoner_id] = OUTCOME_KILLED if killed else (OUTCOME_CALMED if calmed else OUTCOME_TASER)
 	if killed :
 		has_killed = true
 			
@@ -108,3 +118,23 @@ func compute_ending() -> Ending:
 		return Ending.BRUTE
 	else : 
 		return Ending.BON
+
+
+func elapsed_seconds() -> int:
+	return int((Time.get_ticks_msec() - _start_ms) / 1000.0)
+
+
+## Fins déjà vues (gardées d'une partie à l'autre).
+func ending_seen(ending: int) -> bool:
+	var cfg := ConfigFile.new()
+	cfg.load(PROGRESS_PATH)
+	return cfg.get_value("fins", str(ending), false)
+
+
+func mark_ending_seen(ending: int) -> void:
+	if ending <= Ending.NONE:
+		return
+	var cfg := ConfigFile.new()
+	cfg.load(PROGRESS_PATH)
+	cfg.set_value("fins", str(ending), true)
+	cfg.save(PROGRESS_PATH)

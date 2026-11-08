@@ -108,10 +108,12 @@ func _poser_bureau() -> void:
 			dalle.material_override = mat
 			_ecrans.append(mat)
 
-	var tel := TELEPHONE.instantiate() as Node3D
+	# le téléphone se décroche : il faut aller répondre pour lancer l'appel
+	var tel := Telephone.new()
 	tel.name = "Telephone"
 	tel.position = TELEPHONE_POS
 	tel.rotation.y = _vers_chaise(TELEPHONE_POS) * 0.7
+	tel.add_child(TELEPHONE.instantiate())
 	add_child(tel)
 
 

@@ -55,6 +55,9 @@ const LINES: Dictionary = {
 	&"turn_2_sortie": [  # Il voit le détenu 2 sortir de sa cellule
 		[&"joueur", "Le 2 ! Il a forcé sa porte… Il part vers les cuisines…"],
 	],
+	&"turn_2_cuisine": [  # Il voit le détenu 2 fouiller les cuisines (CAM 15)
+		[&"joueur", "Les cuisines… Il fouille les tiroirs. Qu'est-ce qu'il cherche ?"],
+	],
 	&"turn_2_refectoire": [  # Il voit le détenu 2 arrêté au réfectoire
 		[&"joueur", "Il s'est arrêté au réfectoire… Il tient quelque chose. Un couteau ? Je dois y aller."],
 	],
@@ -88,6 +91,16 @@ const LINES: Dictionary = {
 	],
 	&"turn_3_done": [  # Après le dernier détenu (1 ou 3)
 		[&"joueur", "C'est fini… Les trois sont maîtrisés. Retour au bureau."],
+	],
+	# Retour au bureau, juste avant l'écran de fin (une réplique par fin)
+	&"fin_bon": [
+		[&"joueur", "Le jour se lève… Ils sont tous dans leur cellule. Personne n'est mort cette nuit."],
+	],
+	&"fin_brute": [
+		[&"joueur", "Il y a du sang sur mes manches… Ils ne m'ont pas laissé le choix. Pas vrai ?"],
+	],
+	&"fin_truand": [
+		[&"joueur", "Plus personne ne cherche le Quatrième. Cette nuit, c'est moi qui surveille."],
 	],
 }
 
@@ -124,6 +137,7 @@ const TALK_2_END := {
 }
 
 const OBJECTIVES: Dictionary = {
+	&"telephone": "Décrocher le téléphone (sur le bureau)",
 	&"intro": "Rejoindre le poste de surveillance (au fond du bureau)",
 	&"turn_1": "Regarder la caméra de la cellule 1 (CAM 02)",
 	&"turn_1_empty": "Aller à la cellule 1 (bloc A, au nord-ouest)",

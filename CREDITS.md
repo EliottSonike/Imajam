@@ -48,9 +48,11 @@ sont découpés en morceaux ; tous sont mis à l'échelle et placés par `script
 
 - Halètement (`assets/sounds/halete.wav`) : « Male Breathing Slow », freesound_community (Pixabay),
   accéléré.
+- Pas (`assets/sounds/step_1.ogg` à `step_8.ogg`) : « Concrete Footsteps 1 », freesound_community (Pixabay),
+  licence Pixabay (attribution non requise) ; découpés en 8 pas tirés au hasard.
 - Cri du taser (`assets/sounds/cri_taser.wav`) : fait à partir de la voix d'Eliott.
 - Autres sons de `assets/sounds/` : ajoutés par l'équipe — **sources à compléter** (ambiance,
-  porte, coup de feu, sonnerie, screamer, taser, pas).
+  porte, coup de feu, sonnerie, screamer, taser).
 
 ## Voix
 

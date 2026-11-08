@@ -14,6 +14,7 @@ var _cam: Control
 var _cam_title: Label
 var _cam_rec: Label
 var _cam_time: Label
+var _cam_motion: Label
 var _static: ColorRect
 var _sub_timer := 0.0
 var _sub_fade: Tween
@@ -115,6 +116,7 @@ func _process(delta: float) -> void:
 		var c := int(_clock)
 		_cam_time.text = "08/11/2026   %02d:%02d:%02d" % [floori(c / 3600.0) % 24, floori(c / 60.0) % 60, c % 60]
 		_cam_rec.visible = fmod(_clock, 1.0) < 0.6
+		_update_motion()
 
 
 func show_controls(duration := 14.0) -> void:
@@ -229,7 +231,12 @@ func _build_camera_overlay() -> void:
 	_cam_time.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_anchor(_cam_time, 1.0, 0.0, -460, -36, 28, 58)
 	_cam.add_child(_cam_time)
-	var hint := UiTheme.mono("◄ ►  /  Q D : changer de caméra        ÉCHAP : quitter les écrans", 15, UiTheme.DIM)
+	# détecteur de mouvement : signale une autre caméra qui filme un détenu en déplacement
+	_cam_motion = UiTheme.mono("", 20, UiTheme.AMBER)
+	_cam_motion.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	_anchor(_cam_motion, 1.0, 0.0, -760, -36, 62, 94)
+	_cam.add_child(_cam_motion)
+	var hint := UiTheme.mono("◄ ►  /  Q D : changer de caméra        ESPACE : caméra en alerte        ÉCHAP : quitter les écrans", 15, UiTheme.DIM)
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_anchor(hint, 0.5, 1.0, -500, 500, -50, -24)
 	_cam.add_child(hint)
@@ -248,6 +255,17 @@ func _build_camera_overlay() -> void:
 	_static = UiTheme.shader_rect(UiTheme.STATIC_FX)
 	(_static.material as ShaderMaterial).set_shader_parameter("amount", 0.0)
 	add_child(_static)
+
+
+func _update_motion() -> void:
+	var sys := get_tree().get_first_node_in_group(&"camera_system") as CameraSystem
+	var cam: SecurityCamera = sys.motion_camera() if sys else null
+	if cam == null:
+		_cam_motion.text = ""
+		return
+	var label: String = cam.label if cam.label != "" else String(cam.camera_id)
+	_cam_motion.text = "▲ MOUVEMENT  CAM %02d  —  %s   [ESPACE]" % [sys.motion_index + 1, label.to_upper()]
+	_cam_motion.modulate.a = 1.0 if fmod(_clock, 0.8) < 0.55 else 0.35
 
 
 func _on_camera_mode(active: bool) -> void:
