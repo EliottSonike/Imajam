@@ -1,12 +1,14 @@
 extends Node
 ## État global de la partie (items, journaux, kills, courant, carte).
 
-enum Ending { NONE, BON, BRUTE, TRUAND }
+enum Ending { NONE, BON, BRUTE, TRUAND, MORT }
 
 const ITEM_GUN := &"gun"
 const ITEM_TASER := &"taser"
 const ITEM_MEDS := &"meds"
 const JOURNAL_COUNT := 4
+## Deux vies : au premier coup la vision se trouble, au deuxième (sans médicaments entre-temps) il meurt.
+const MAX_HEALTH := 2
 
 var items: Dictionary = {}
 var journals: Array[bool] = []
@@ -14,6 +16,7 @@ var has_killed := false
 var has_map := false
 var power_on := true
 var vision_impaired := false
+var health := MAX_HEALTH
 
 
 func _ready() -> void:
@@ -28,6 +31,7 @@ func reset() -> void:
 	has_map = false
 	power_on = true
 	vision_impaired = false
+	health = MAX_HEALTH
 
 # Ajouter l'item, puis émettre item_picked
 func add_item(id: StringName, count := 1) -> void:
@@ -46,8 +50,25 @@ func use_meds() -> bool:
 	if not(has_item(ITEM_MEDS)) or not(vision_impaired):
 		return false
 	items[ITEM_MEDS] -= 1
+	health = MAX_HEALTH
 	set_vision_impaired(false)
 	return true 
+
+
+## Le garde prend un coup : vision trouble, puis la mort s'il n'a pas pris de médicaments.
+func hurt(amount := 1) -> void:
+	if health <= 0:
+		return
+	health = maxi(health - amount, 0)
+	Events.player_hurt.emit(health)
+	if health <= 0:
+		Events.player_died.emit()
+	else:
+		set_vision_impaired(true)
+
+
+func is_dead() -> bool:
+	return health <= 0
 
 # ramasse le journal
 func pick_journal(index: int) -> void:

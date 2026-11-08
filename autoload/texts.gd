@@ -26,11 +26,15 @@ const LINES: Dictionary = {
 	&"intro": [
 		[&"telephone", "Allô ? C'est moi. Tu as pris ton poste, parfait."],
 		[&"telephone", "Il ne reste que trois détenus. Ils ne doivent pas quitter leur cellule."],
-		[&"telephone", "Installe-toi aux écrans, au fond du bureau. Commence par la cellule 1 : le 1 ne répond plus."],
+		[&"telephone", "Installe-toi aux écrans, au fond du bureau."],
 		[&"telephone", "Je ne pourrai pas te rappeler cette nuit. Tu es seul. Bon courage."],
 	],
-	&"turn_1": [  # Premier passage aux écrans
+	# Premier tour : le garde choisit lui-même sa cellule (turn_1, turn_2 ou turn_3_suite selon le tirage).
+	&"turn_1": [  # Tour du détenu 1 quand il passe en premier
 		[&"joueur", "Bon. La cellule 1 d'abord… caméra 2."],
+	],
+	&"turn_1_suite": [  # Tour du détenu 1 quand il passe en 2e ou 3e
+		[&"joueur", "La cellule 1, maintenant… caméra 2."],
 	],
 	&"turn_1_empty": [  # Il voit la cellule 1 vide à l'écran
 		[&"joueur", "Quoi ?! La porte n'a pas bougé… Il est forcément encore là-dedans."],
@@ -39,10 +43,13 @@ const LINES: Dictionary = {
 	&"detenu_1_attaque": [  # Le détenu 1 sort de l'angle mort
 		[&"detenu_1", "COUCOU, j'étais bien caché ?"],
 	],
-	&"turn_1_done": [  # Après le détenu 1
+	&"turn_1_fuite": [  # Le détenu 1 l'a bousculé et file dans la prison
+		[&"joueur", "Il file ! Pas le choix… je sors mon arme."],
+	],
+	&"turn_1_done": [  # Après le détenu 1 ou 3, s'il en reste
 		[&"joueur", "Un de moins… Retour aux écrans."],
 	],
-	&"turn_2": [  # Retour aux écrans après le détenu 1
+	&"turn_2": [  # Tour du détenu 2 (n'importe quand)
 		[&"joueur", "Le bloc B est agité ce soir… Voyons la cellule 2. Caméra 9."],
 	],
 	&"turn_2_sortie": [  # Il voit le détenu 2 sortir de sa cellule
@@ -54,14 +61,17 @@ const LINES: Dictionary = {
 	&"detenu_2_couteau": [  # Le joueur entre dans le réfectoire
 		[&"detenu_2", "N'approche pas ! J'ai un couteau… Je n'hésiterai pas à l'utiliser"],
 	],
-	&"turn_2_calme": [  # Négociation réussie
+	&"turn_2_calme": [  # Négociation réussie (vaut aussi s'il était le dernier)
 		[&"joueur", "Il a lâché le couteau… C'est fini. Il faut que je retourne au bureau."],
 	],
 	&"turn_2_tue": [  # Négociation ratée : le joueur a dû tirer
 		[&"joueur", "Je n'avais pas le choix… Je n'avais pas le choix. Il m'a attaqué, il faut que je retourne au bureau."],
 	],
-	&"turn_3": [  # Retour aux écrans après le détenu 2
+	&"turn_3": [  # Tour du détenu 3 quand il passe en dernier
 		[&"joueur", "Plus que le 3. Cellule 3… caméra 6."],
+	],
+	&"turn_3_suite": [  # Tour du détenu 3 quand il passe en 1er ou 2e (fin de turn_3_1, recoupée)
+		[&"joueur", "Cellule 3… caméra 6."],
 	],
 	&"turn_3_sortie": [  # Il voit le détenu 3 courir
 		[&"joueur", "Le 3 sort ! Il court… vers le générateur ?! S'il coupe le courant, je suis mal !"],
@@ -76,7 +86,7 @@ const LINES: Dictionary = {
 	&"detenu_3_screamer": [
 		[&"detenu_3", "A MON TOUR"],
 	],
-	&"turn_3_done": [  # Après le détenu 3
+	&"turn_3_done": [  # Après le dernier détenu (1 ou 3)
 		[&"joueur", "C'est fini… Les trois sont maîtrisés. Retour au bureau."],
 	],
 }
@@ -117,7 +127,9 @@ const OBJECTIVES: Dictionary = {
 	&"intro": "Rejoindre le poste de surveillance (au fond du bureau)",
 	&"turn_1": "Regarder la caméra de la cellule 1 (CAM 02)",
 	&"turn_1_empty": "Aller à la cellule 1 (bloc A, au nord-ouest)",
+	&"turn_1_traque": "Retrouver le détenu 1 et l'abattre  (clic gauche : tirer)",
 	&"turn_1_done": "Retourner au poste de surveillance",
+	&"calme": "Surveiller les caméras",
 	&"turn_2": "Regarder la cellule 2 (CAM 09)",
 	&"turn_2_sortie": "Suivre le détenu 2 sur les caméras (cuisines, réfectoire)",
 	&"turn_2_refectoire": "Aller au réfectoire (au nord)",
@@ -152,9 +164,9 @@ const JOURNALS: Array = [
 ## Noms affichés des détenus et phrase de la confrontation.
 const PRISONER_NAMES: Dictionary = {1: "Le Caméléon", 2: "Le Fragmenté", 3: "L'Électricien"}
 const ENCOUNTERS: Dictionary = {
-	1: "Il jaillit de l'angle mort et se jette sur toi !",
+	1: "Il jaillit de l'angle mort, te bouscule et file vers la porte !",
 	2: "Il se jette sur toi, le couteau levé !",
-	3: "La lumière revient… il est juste devant toi !",
+	3: "La lumière revient… il t'agrippe par derrière !",
 }
 
 ## Fins (clés = GameState.Ending).
@@ -173,5 +185,10 @@ const ENDINGS: Dictionary = {
 		"title": "LE TRUAND",
 		"subtitle": "Fin secrète",
 		"body": "Les quatre pages réunies ne laissent aucun doute : tu n'es pas à ta place.\n\nTu plies soigneusement les pages, tu les glisses dans la poche de ton uniforme, et tu reprends ta place devant les écrans.\n\nCette prison n'a jamais été aussi bien gardée. Et maintenant, elle est à toi.",
+	},
+	4: {
+		"title": "LA PROIE",
+		"subtitle": "Mauvaise fin",
+		"body": "Au matin, la relève trouve le poste de contrôle vide et les écrans allumés.\n\nSur l'un d'eux, un corps en uniforme est étendu au milieu d'un couloir. Personne ne l'a vu tomber.\n\nLes caméras, elles, ont tout enregistré.",
 	},
 }

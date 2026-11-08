@@ -10,6 +10,10 @@ const TENUES := {
 	3: preload("res://models/prisonnier_tenue_rouge.png"),
 }
 const ANIM_BOUCLES: Array[StringName] = [&"idle", &"marche", &"course", &"accroupi", &"assis_boucle", &"agite"]
+## Regardé trop longtemps à l'écran, il tourne lentement la tête vers la caméra (puis le corps s'il est debout).
+const STARE_DELAY := 4.0  # s à l'écran avant qu'il réagisse
+const STARE_TURN := 1.6  # s pour tourner la tête
+const STARE_BODY_SPEED := 0.5  # rad/s quand il pivote en entier
 
 @export var prisoner_id := 0
 @export var display_name := ""
@@ -19,6 +23,7 @@ const ANIM_BOUCLES: Array[StringName] = [&"idle", &"marche", &"course", &"accrou
 var taser_allowed := true
 
 var resolved := false
+var _shot_by_gun := false  # abattu au pistolet par le garde : le coup de feu a déjà été entendu
 
 var _model: Node3D
 var _anim: AnimationPlayer
@@ -34,6 +39,12 @@ var _moving := false
 var _busy := false
 var _seen_cache := false
 var _seen_check := 0.0
+var _stare_t := 0.0
+var _stare_w := 0.0
+var _stare_locked := false
+var _look_target: Node3D
+var _look_head: LookAtModifier3D
+var _look_torso: LookAtModifier3D
 
 
 func _ready() -> void:
@@ -51,6 +62,7 @@ func _process(delta: float) -> void:
 		flat.y = 0.0
 		_speed = lerpf(_speed, flat.length() / delta, minf(1.0, 10.0 * delta))
 	_last_pos = global_position
+	_update_stare(delta)
 	if resolved or _busy or _anim == null:
 		return
 	if _pose != &"":
@@ -119,9 +131,10 @@ func on_resolved(killed: bool) -> void:
 		_anim.speed_scale = 1.0
 		_anim.play(&"idle", 0.15)
 	if killed:
-		Sfx.play("gunshot")
-		Events.flash.emit(Color(1.0, 0.85, 0.55, 0.8))
-		Events.shake.emit(0.8)
+		if not _shot_by_gun:  # abattu au pistolet par le garde : le coup de feu a déjà retenti
+			Sfx.play("gunshot")
+			Events.flash.emit(Color(1.0, 0.85, 0.55, 0.8))
+			Events.shake.emit(0.8)
 	else:
 		Sfx.play("taser")
 		Sfx.play_at("cri_taser" if Sfx.has_sound("cri_taser") else "scream", global_position + Vector3.UP * 1.5, 2.0, 6.0)
@@ -137,6 +150,11 @@ func on_resolved(killed: bool) -> void:
 	await fall.finished
 	if _anim:
 		_anim.pause()
+
+
+## Touché par une balle du garde. Renvoie vrai si ça compte (sinon la balle s'écrase sur lui sans effet).
+func on_shot(_by: Node) -> bool:
+	return false
 
 
 func set_hidden_from_cameras(hidden: bool) -> void:
@@ -167,6 +185,49 @@ func camera_sees(cam: SecurityCamera) -> bool:
 	query.collision_mask = 1  # seulement les murs et le décor
 	query.exclude = [_body.get_rid()]
 	return get_world_3d().direct_space_state.intersect_ray(query).is_empty()
+
+
+## Peut-il fixer la caméra ? Seulement à l'arrêt, hors action.
+func _can_stare() -> bool:
+	return not resolved and not _busy and not _moving
+
+
+## Peut-il pivoter tout le corps vers la caméra (debout) ? Sinon seulement la tête.
+func _can_turn_body() -> bool:
+	return true
+
+
+func _update_stare(delta: float) -> void:
+	if _look_head == null:
+		return
+	var cam: SecurityCamera = null
+	if _can_stare() and _update_seen(delta):
+		var sys := get_tree().get_first_node_in_group(&"camera_system") as CameraSystem
+		cam = sys.current_camera() if sys else null
+	if cam:
+		_stare_t += delta
+		_look_target.global_position = cam.global_position
+	else:
+		_stare_t = 0.0
+	var staring := _stare_t >= STARE_DELAY
+	_stare_w = move_toward(_stare_w, 1.0 if staring else 0.0, delta / STARE_TURN)
+	var w := smoothstep(0.0, 1.0, _stare_w)
+	var body := _can_turn_body()
+	_look_head.influence = w
+	_look_head.active = w > 0.0
+	_look_torso.influence = w * (0.4 if body else 0.0)
+	_look_torso.active = _look_torso.influence > 0.0
+	# il a croisé ton regard : petit grésillement sur l'écran
+	if staring and _stare_w >= 1.0 and not _stare_locked:
+		_stare_locked = true
+		Sfx.play("static", -16.0, 0.55)
+	elif not staring:
+		_stare_locked = false
+	# puis il se tourne lentement face à la caméra
+	if body and staring and _stare_t > STARE_DELAY + STARE_TURN:
+		var d := _look_target.global_position - global_position
+		if Vector2(d.x, d.z).length() > 0.1:
+			rotation.y = rotate_toward(rotation.y, atan2(-d.x, -d.z), STARE_BODY_SPEED * delta)
 
 
 func face_instant(point: Vector3) -> void:
@@ -265,6 +326,8 @@ func _build_model() -> void:
 		number.transform = _skeleton.get_bone_global_rest(bone).affine_inverse() * wanted
 		attach.add_child(number)
 
+	_build_stare()
+
 	_body = AnimatableBody3D.new()
 	_body.sync_to_physics = false
 	_body_shape = CollisionShape3D.new()
@@ -275,3 +338,37 @@ func _build_model() -> void:
 	_body_shape.position.y = 0.875
 	_body.add_child(_body_shape)
 	add_child(_body)
+
+
+## Deux modificateurs « regarder vers » : le torse aide un peu, la tête finit le mouvement.
+func _build_stare() -> void:
+	if _skeleton == null or _skeleton.find_bone("tete") < 0 or _skeleton.find_bone("torse") < 0:
+		return
+	_look_target = Node3D.new()
+	_look_target.name = "CibleRegard"
+	_look_target.top_level = true
+	add_child(_look_target)
+	_look_torso = _look_at_modifier("torse", 90.0, 40.0)
+	_look_head = _look_at_modifier("tete", 150.0, 100.0)
+
+
+func _look_at_modifier(bone: String, yaw_range: float, pitch_range: float) -> LookAtModifier3D:
+	var m := LookAtModifier3D.new()
+	m.name = "Regard_" + bone
+	m.bone_name = bone
+	m.forward_axis = SkeletonModifier3D.BONE_AXIS_PLUS_Z  # le visage regarde vers +Z dans le squelette
+	m.primary_rotation_axis = Vector3.AXIS_Y
+	m.use_angle_limitation = true
+	m.symmetry_limitation = true
+	m.primary_limit_angle = deg_to_rad(yaw_range)
+	m.primary_damp_threshold = 0.6
+	m.secondary_limit_angle = deg_to_rad(pitch_range)
+	m.secondary_damp_threshold = 0.6
+	m.duration = 0.6  # changement de caméra : il suit en douceur
+	m.transition_type = Tween.TRANS_SINE
+	m.ease_type = Tween.EASE_IN_OUT
+	m.influence = 0.0
+	m.active = false
+	_skeleton.add_child(m)
+	m.target_node = m.get_path_to(_look_target)
+	return m

@@ -39,6 +39,7 @@ sauf mention contraire.
 | caution wet floor / cleaning sign v2 | Sousinho | `models/panneau_sol_mouille.glb` |
 | Cleaning Cart | Kerridge1 | `models/chariot_menage.glb` — **CC-BY-NC 4.0 : pas d'usage commercial** |
 | Security camera | Veebroush | `models/camera_surveillance.glb` — **licence Sketchfab Standard** : utilisable dans le jeu, pas de redistribution du modèle seul |
+| Pistol | Quaternius (Poly Pizza) | `models/pistolet.fbx` — **CC0** (domaine public) |
 
 Modifications : textures réduites (`tools/optimize_glb.py`) ; le casier, la caméra et l'électroménager
 sont découpés en morceaux ; tous sont mis à l'échelle et placés par `scripts/world/mobilier.gd`.

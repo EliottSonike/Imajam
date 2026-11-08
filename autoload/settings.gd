@@ -4,7 +4,7 @@ const PATH := "user://settings.cfg"
 
 var volume := 0.8
 var mouse_sensitivity := 0.0025
-var fullscreen := false
+var fullscreen := true  # le jeu s'ouvre en plein écran (désactivable dans Options)
 
 
 func _ready() -> void:
@@ -12,7 +12,8 @@ func _ready() -> void:
 	if cfg.load(PATH) == OK:
 		volume = cfg.get_value("audio", "volume", volume)
 		mouse_sensitivity = cfg.get_value("controls", "mouse_sensitivity", mouse_sensitivity)
-		fullscreen = cfg.get_value("video", "fullscreen", fullscreen)
+		# nouvelle clé : les anciennes sauvegardes (fenêtré par défaut) ne bloquent plus le plein écran
+		fullscreen = cfg.get_value("video", "plein_ecran", fullscreen)
 	apply()
 
 
@@ -27,5 +28,5 @@ func save() -> void:
 	var cfg := ConfigFile.new()
 	cfg.set_value("audio", "volume", volume)
 	cfg.set_value("controls", "mouse_sensitivity", mouse_sensitivity)
-	cfg.set_value("video", "fullscreen", fullscreen)
+	cfg.set_value("video", "plein_ecran", fullscreen)
 	cfg.save(PATH)

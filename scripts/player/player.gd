@@ -3,6 +3,28 @@ extends CharacterBody3D
 ## Contrôleur FPS du garde.
 
 const BODY_LAYER := 3
+## Pistolet (traque du détenu 1) : coup par coup, munitions infinies.
+const GUN_REST := Vector3(0.16, -0.15, -0.34)
+const GUN_MODEL := preload("res://models/pistolet.fbx")
+const GUN_LENGTH := 0.2  # m, du chien au bout du canon
+const GUN_SHADER := """
+shader_type spatial;
+uniform vec4 albedo : source_color = vec4(0.2, 0.2, 0.2, 1.0);
+
+void vertex() {
+	// profondeur ramenée vers le plan proche (Z inversé : 1 = proche), en gardant l'ordre de ses propres faces
+	POSITION = PROJECTION_MATRIX * MODELVIEW_MATRIX * vec4(VERTEX, 1.0);
+	POSITION.z = mix(POSITION.z, POSITION.w, 0.9);
+}
+
+void fragment() {
+	ALBEDO = albedo.rgb;
+	ROUGHNESS = 0.55;
+	METALLIC = 0.2;
+}
+"""
+const GUN_COOLDOWN := 0.35
+const GUN_RANGE := 60.0
 
 @export var walk_speed := 3.0
 @export var sprint_speed := 5.0
@@ -15,6 +37,7 @@ const BODY_LAYER := 3
 @onready var ray: RayCast3D = $Head/Camera3D/InteractRay
 
 var is_sprinting := false
+var gun_drawn := false
 
 var _locks := {}
 var _target: Interactable = null
@@ -24,12 +47,17 @@ var _shake := 0.0
 var _vision_t := 0.0
 var _step_timer := 0.0
 var _step_player: AudioStreamPlayer
+var _gun: Node3D
+var _gun_flash: OmniLight3D
+var _gun_cooldown := 0.0
+var _knock := Vector3.ZERO
 
 
 func _ready() -> void:
 	add_to_group(&"player")
 	camera.set_cull_mask_value(BODY_LAYER, false)
 	_build_body()
+	_build_gun()
 	_step_player = AudioStreamPlayer.new()
 	_step_player.stream = Sfx.stream("step")
 	_step_player.volume_db = -12.0
@@ -65,7 +93,11 @@ func _input(event: InputEvent) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if is_locked():
 		return
-	if event.is_action_pressed(&"interact"):
+	var click := event as InputEventMouseButton
+	if gun_drawn and click and click.pressed and click.button_index == MOUSE_BUTTON_LEFT:
+		shoot()
+		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed(&"interact"):
 		if _target and _target.can_interact(self):
 			_target.interact(self)
 			get_viewport().set_input_as_handled()
@@ -97,6 +129,11 @@ func _physics_process(delta: float) -> void:
 	else:
 		velocity.x = move_toward(velocity.x, 0.0, speed)
 		velocity.z = move_toward(velocity.z, 0.0, speed)
+	# bousculé : poussée qui retombe vite (et qui s'arrête contre les murs)
+	velocity.x += _knock.x
+	velocity.z += _knock.z
+	_knock = _knock.move_toward(Vector3.ZERO, 14.0 * delta)
+	_gun_cooldown -= delta
 	move_and_slide()
 
 	_update_head(delta, direction != Vector3.ZERO and is_on_floor(), speed)
@@ -137,6 +174,100 @@ func face_point(point: Vector3, duration := 0.25) -> void:
 	var tw := create_tween().set_parallel()
 	tw.tween_property(self, "rotation:y", rotation.y + wrapf(yaw - rotation.y, -PI, PI), duration)
 	tw.tween_property(head, "rotation:x", clampf(pitch, -1.2, 1.2), duration)
+
+
+## Poussée (bousculade, coup reçu), dans le plan horizontal.
+func push(direction: Vector3, strength: float) -> void:
+	direction.y = 0.0
+	if direction.length() > 0.01:
+		_knock = direction.normalized() * strength
+
+
+## Coup reçu d'un détenu : il recule, l'écran rougit, et une vie part.
+func take_hit(from: Vector3, strength := 4.0) -> void:
+	Events.flash.emit(Color(0.7, 0.0, 0.0, 0.6))
+	Events.shake.emit(1.3)
+	Sfx.play("screamer", -8.0, 1.3)
+	push(global_position - from, strength)
+	GameState.hurt()
+
+
+## Il s'effondre (mort du garde).
+func collapse() -> void:
+	set_lock(&"dead", true)
+	draw_gun(false)
+	var tw := create_tween().set_parallel()
+	tw.tween_property(head, "position:y", 0.35, 1.1).set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
+	tw.tween_property(head, "rotation:z", 1.2, 0.9).set_trans(Tween.TRANS_QUAD)
+	tw.tween_property(head, "rotation:x", -0.3, 0.9)
+
+
+## Sort ou range le pistolet.
+func draw_gun(on: bool) -> void:
+	if on == gun_drawn or _gun == null:
+		return
+	gun_drawn = on
+	var hidden := GUN_REST + Vector3(0.0, -0.25, 0.1)
+	var tw := create_tween()
+	if on:
+		_gun.visible = true
+		_gun.position = hidden
+		tw.tween_property(_gun, "position", GUN_REST, 0.3).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		Sfx.play("pickup", -6.0, 0.6)
+	else:
+		tw.tween_property(_gun, "position", hidden, 0.25)
+		tw.tween_callback(func() -> void: _gun.visible = false)
+	Events.gun_drawn.emit(on)
+
+
+## Un coup de pistolet, au centre de l'écran.
+func shoot() -> void:
+	if _gun_cooldown > 0.0:
+		return
+	_gun_cooldown = GUN_COOLDOWN
+	Sfx.play("gunshot", -3.0, randf_range(0.95, 1.05))
+	Events.shake.emit(0.25)
+	_gun.position = GUN_REST + Vector3(0.0, 0.012, 0.06)
+	_gun.rotation.x = 0.28
+	var tw := create_tween().set_parallel()
+	tw.tween_property(_gun, "position", GUN_REST, 0.18).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tw.tween_property(_gun, "rotation:x", 0.0, 0.22).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	head.rotation.x = clampf(head.rotation.x + 0.015, deg_to_rad(-85.0), deg_to_rad(85.0))
+	_gun_flash.visible = true
+	get_tree().create_timer(0.06, false).timeout.connect(func() -> void: _gun_flash.visible = false)
+
+	var from := camera.global_position
+	var query := PhysicsRayQueryParameters3D.create(from, from - camera.global_basis.z * GUN_RANGE)
+	query.collision_mask = 1
+	query.exclude = [get_rid()]
+	var hit := get_world_3d().direct_space_state.intersect_ray(query)
+	if hit.is_empty():
+		return
+	var n := hit.collider as Node
+	while n != null and not (n is Prisoner):
+		n = n.get_parent()
+	if n and (n as Prisoner).on_shot(self):
+		return
+	_impact(hit.position, hit.normal)
+
+
+## Petit trou noir là où la balle a frappé.
+func _impact(point: Vector3, normal: Vector3) -> void:
+	var dot := MeshInstance3D.new()
+	var mesh := SphereMesh.new()
+	mesh.radius = 0.022
+	mesh.height = 0.044
+	mesh.radial_segments = 8
+	mesh.rings = 4
+	dot.mesh = mesh
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(0.03, 0.03, 0.03)
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	dot.material_override = mat
+	dot.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	get_tree().current_scene.add_child(dot)
+	dot.global_position = point + normal * 0.004
+	get_tree().create_timer(12.0, false).timeout.connect(dot.queue_free)
 
 
 func teleport(pos: Vector3, yaw: float) -> void:
@@ -198,3 +329,48 @@ func _build_body() -> void:
 	body.material_override = mat
 	body.layers = 1 << (BODY_LAYER - 1)
 	add_child(body)
+
+
+## Pistolet « Pistol » de Quaternius (CC0), accroché à la caméra, sur le calque caché aux caméras de surveillance.
+## Sa profondeur est écrasée vers le plan proche (GUN_SHADER) : il passe devant les murs sans s'y enfoncer.
+func _build_gun() -> void:
+	_gun = Node3D.new()
+	_gun.name = "Pistolet"
+	_gun.position = GUN_REST
+	_gun.rotation.y = 0.06  # légèrement tourné vers le centre de l'écran
+	_gun.visible = false
+	camera.add_child(_gun)
+	var holder := Node3D.new()
+	holder.rotation.y = PI / 2.0  # le canon du modèle pointe vers +X : on le tourne vers -Z
+	_gun.add_child(holder)
+	var model := GUN_MODEL.instantiate() as Node3D
+	holder.add_child(model)
+
+	var shader := Shader.new()
+	shader.code = GUN_SHADER
+	var meshes := model.find_children("*", "MeshInstance3D", true, false)
+	var box := AABB()
+	for i in meshes.size():
+		var mi := meshes[i] as MeshInstance3D
+		var t := _gun.global_transform.affine_inverse() * mi.global_transform
+		box = t * mi.get_aabb() if i == 0 else box.merge(t * mi.get_aabb())
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		mi.layers = 1 << (SecurityCamera.HIDDEN_FROM_CAMERAS_LAYER - 1)
+		for surface in mi.mesh.get_surface_count():
+			var src := mi.get_active_material(surface) as BaseMaterial3D
+			var mat := ShaderMaterial.new()
+			mat.shader = shader
+			mat.set_shader_parameter("albedo", src.albedo_color if src else Color(0.2, 0.2, 0.2))
+			mi.set_surface_override_material(surface, mat)
+	# taille et centrage d'après la boîte englobante (longueur = axe Z une fois tourné)
+	var k := GUN_LENGTH / maxf(box.size.z, 0.001)
+	holder.scale = Vector3.ONE * k
+	holder.position = -box.get_center() * k
+
+	_gun_flash = OmniLight3D.new()
+	_gun_flash.light_color = Color(1.0, 0.78, 0.45)
+	_gun_flash.light_energy = 5.0
+	_gun_flash.omni_range = 5.0
+	_gun_flash.position = Vector3(0.0, GUN_LENGTH * 0.15, -GUN_LENGTH * 0.6)
+	_gun_flash.visible = false
+	_gun.add_child(_gun_flash)

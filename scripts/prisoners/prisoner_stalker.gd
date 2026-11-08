@@ -22,6 +22,10 @@ enum State { IDLE, WAITING, ESCAPING, STALKING, CHASING }
 ## Couché dans son lit jusqu'à son tour (actes 0, 1 et 2) : position des pieds sur le matelas.
 @export var bed_feet := Vector3(16.24, 0.82, -12.05)  # matelas à ~0,66 m + épaisseur du dos
 @export var start_in_bed := true
+## Phrases qu'il lâche dans le noir pendant la traque (assets/voix/detenu_3/) : ordre au hasard, jamais deux fois.
+@export var murmures: Array[String] = ["detenu_3_murmure_1", "detenu_3_murmure_2", "detenu_3_murmure_3", "detenu_3_murmure_4"]
+@export var murmure_first := Vector2(4.0, 8.0)  # délai avant la première (s)
+@export var murmure_gap := Vector2(10.0, 16.0)  # puis entre deux
 
 var state := State.IDLE
 var _repath := 0.0
@@ -29,6 +33,9 @@ var _retarget := 0.0
 var _step_t := 0.0
 var _steps: AudioStreamPlayer3D
 var _breath: AudioStreamPlayer3D
+var _voice: AudioStreamPlayer3D
+var _to_say: Array[String] = []
+var _murmure_t := -1.0
 var _wait_left := 0.0
 var _spotted := false
 var _yeux: Array[Node3D] = []
@@ -39,9 +46,19 @@ var _stand := Transform3D()
 
 func _ready() -> void:
 	super._ready()
-	_steps = Sfx.player_3d(self, "step", 3.0, 2.0, false)
+	# pas lourds (plus graves que ceux du garde) qu'on entend venir de loin
+	_steps = Sfx.player_3d(self, "step", 6.0, 9.0, false)
+	_steps.max_distance = 35.0
 	_breath = Sfx.player_3d(self, "breath", 2.0, -3.0, true)
 	_breath.position.y = 1.5
+	_voice = AudioStreamPlayer3D.new()
+	_voice.unit_size = 7.0
+	_voice.volume_db = 6.0
+	_voice.max_distance = 50.0
+	_voice.position.y = 1.6
+	add_child(_voice)
+	_to_say.assign(murmures)
+	_to_say.shuffle()
 	_build_eyes()
 	_set_eyes(not GameState.power_on)
 	Events.power_changed.connect(_on_power_changed)
@@ -70,7 +87,19 @@ func _get_up() -> void:
 	await tw.finished
 
 
+## Couché dans son lit : il tourne juste la tête vers la caméra.
+func _can_stare() -> bool:
+	return _in_bed and state in [State.IDLE, State.WAITING] and super._can_stare()
+
+
+func _can_turn_body() -> bool:
+	return not _in_bed
+
+
 func on_resolved(killed: bool) -> void:
+	_to_say.clear()
+	if _voice:
+		_voice.stop()
 	resolved = true
 	_set_eyes(false)
 	super.on_resolved(killed)
@@ -108,6 +137,8 @@ func start_stalking() -> void:
 		return
 	state = State.STALKING
 	_breath.play()
+	if _murmure_t < 0.0:
+		_murmure_t = randf_range(murmure_first.x, murmure_first.y)
 	_pick_patrol()
 
 
@@ -115,6 +146,29 @@ func stop_stalking() -> void:
 	state = State.IDLE
 	_moving = false
 	_breath.stop()
+	_voice.stop()
+
+
+## Il parle dans le noir : une phrase pas encore dite, de temps en temps. Mort ou maîtrisé, il se tait.
+func _murmur(delta: float) -> void:
+	if _to_say.is_empty() or _voice.playing:
+		return
+	_murmure_t -= delta
+	if _murmure_t > 0.0:
+		return
+	_murmure_t = randf_range(murmure_gap.x, murmure_gap.y)
+	var stream := Sfx.voice_stream(&"detenu_3", _to_say.pop_back())
+	if stream:
+		_voice.stream = stream
+		_voice.play()
+
+
+func _footstep(delta: float, interval: float) -> void:
+	_step_t -= delta
+	if _moving and _step_t <= 0.0:
+		_step_t = interval
+		_steps.pitch_scale = randf_range(0.62, 0.75)
+		_steps.play()
 
 
 func respawn_far_from(point: Vector3) -> void:
@@ -161,8 +215,55 @@ func screamer_at(player: Player) -> void:
 	Events.screamer.emit()
 	Events.flash.emit(Color(1.0, 1.0, 1.0, 0.9))
 	Events.shake.emit(1.4)
-	await get_tree().create_timer(0.8, false).timeout
-	Events.encounter_requested.emit(self)
+	await get_tree().create_timer(0.6, false).timeout
+	_final_attack(player)
+
+
+## Il l'agrippe par derrière. Avec le taser, le jeu se fige : taser ou QTE. Sans taser, QTE direct.
+## QTE réussi : le garde se dégage et tire. Raté : il prend un coup, le 3 disparaît et revient dans son dos.
+func _final_attack(player: Player) -> void:
+	var panel := ActionPanel.find(get_tree())
+	if panel == null:
+		Events.encounter_requested.emit(self)
+		return
+	var tase := false
+	if GameState.has_item(GameState.ITEM_TASER):
+		var pick := await panel.choose("Détenu %d — %s" % [prisoner_id, display_name],
+			Texts.ENCOUNTERS.get(prisoner_id, ""), ["Taser", "Se dégager (QTE)"])
+		tase = pick == 0
+	if tase:
+		_finish(player, false)
+		return
+	if await panel.run_qte():
+		_finish(player, true)
+		return
+	player.take_hit(global_position)
+	if GameState.is_dead():
+		return
+	_come_back(player)
+
+
+func _finish(player: Player, killed: bool) -> void:
+	GameState.resolve_prisoner(prisoner_id, killed)
+	Events.encounter_resolved.emit(prisoner_id, killed)
+	await get_tree().create_timer(1.2, false).timeout
+	player.set_lock(&"encounter", false)
+	player.make_view_current()
+
+
+## Il lâche prise, se fond dans l'ombre… et revient dans le dos du garde quelques secondes plus tard.
+func _come_back(player: Player) -> void:
+	visible = false
+	_body_shape.set_deferred("disabled", true)
+	await get_tree().create_timer(0.6, false).timeout
+	player.set_lock(&"encounter", false)
+	player.make_view_current()
+	await get_tree().create_timer(randf_range(5.0, 8.0), false).timeout
+	if resolved or GameState.is_dead():
+		return
+	visible = true
+	_body_shape.set_deferred("disabled", false)
+	screamer_at(player)
 
 
 func _physics_process(delta: float) -> void:
@@ -183,6 +284,7 @@ func _physics_process(delta: float) -> void:
 				spotted.emit()
 			var player := _player()
 			var close := player != null and player.global_position.distance_to(global_position) < 3.0
+			_footstep(delta, 0.32)
 			if _follow_path(delta, run_speed) or close:
 				if generator_spot:
 					global_position = generator_spot.global_position
@@ -226,11 +328,8 @@ func _stalk(delta: float) -> void:
 	if _follow_path(delta, speed) and state == State.STALKING:
 		_pick_patrol()
 
-	_step_t -= delta
-	if _moving and _step_t <= 0.0:
-		_step_t = 0.38 if state == State.CHASING else 0.7
-		_steps.pitch_scale = randf_range(0.8, 1.0)
-		_steps.play()
+	_footstep(delta, 0.38 if state == State.CHASING else 0.62)
+	_murmur(delta)
 
 
 func _pick_patrol() -> void:

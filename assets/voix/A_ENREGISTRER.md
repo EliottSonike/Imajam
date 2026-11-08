@@ -1,6 +1,6 @@
 # Voix à enregistrer
 
-45 répliques. Chaque mp3 est nommé avec son code (ex. `G7.mp3`), puis rangé dans
+48 répliques (nouvelles : G25 pour l'ordre aléatoire, G27 pour la traque du détenu 1 ; G26 est déjà couverte). Chaque mp3 est nommé avec son code (ex. `G7.mp3`), puis rangé dans
 `assets/voix/<perso>/<fichier>.mp3` avec le nom de la colonne Fichier (.ogg, .wav ou .mp3).
 Le jeu lance la voix tout seul ; sans fichier, il affiche juste le sous-titre.
 
@@ -12,8 +12,9 @@ Si une réplique change dans autoload/texts.gd, la réenregistrer avec le même 
 |---|---|---|
 | T1 | `intro_1` | Allô ? C'est moi. Tu as pris ton poste, parfait. |
 | T2 | `intro_2` | Il ne reste que trois détenus. Ils ne doivent pas quitter leur cellule. |
-| T3 | `intro_3` | Installe-toi aux écrans, au fond du bureau. Commence par la cellule 1 : le 1 ne répond plus. |
+| T3 | `intro_3` | Installe-toi aux écrans, au fond du bureau. *(déjà enregistrée : la fin « Commence par la cellule 1… » a été coupée)* |
 | T4 | `intro_4` | Je ne pourrai pas te rappeler cette nuit. Tu es seul. Bon courage. |
+
 
 ## Le garde (assets/voix/joueur/)
 
@@ -43,6 +44,12 @@ Si une réplique change dans autoload/texts.gd, la réenregistrer avec le même 
 | G22 | `negociation_3_reponse_1` | Moi. Je reste aux écrans, je ne te lâche pas des yeux. Promis. |
 | G23 | `negociation_3_reponse_2` | Les caméras tournent toute la nuit, de toute façon. |
 | G24 | `negociation_3_reponse_3` | Ce n'est pas mon problème. |
+| G25 | `turn_1_suite_1` | La cellule 1, maintenant… caméra 2. |
+| G26 | `turn_3_suite_1` | Cellule 3… caméra 6. *(déjà faite : fin de G10 recoupée)* |
+| G27 | `turn_1_fuite_1` | Il file ! Pas le choix… je sors mon arme. |
+
+Le premier tour, c'est le garde qui choisit sa cellule : G1, G5 ou G26 selon le détenu tiré. G1 sert quand le 1 passe en premier, G25 sinon. G10 sert quand le 3 passe en dernier, G26 sinon.
+G4 sert après le 1 ou le 3 s'il en reste, G15 après le dernier.
 
 ## Détenu 1 (assets/voix/detenu_1/)
 
@@ -76,3 +83,8 @@ Si une réplique change dans autoload/texts.gd, la réenregistrer avec le même 
 |---|---|---|
 | D3-1 | `detenu_3_screamer_1` | A MON TOUR |
 
+## Murmures du détenu 3 (déjà enregistrés)
+
+Pendant la traque dans le noir, il lâche ces phrases au hasard, chacune une seule fois, et se tait s'il est
+maîtrisé avant : `detenu_3/detenu_3_murmure_1.ogg` à `detenu_3_murmure_4.ogg` (découpées dans « Chez Tonton
+Lazhar 2 »). Pas de sous-titre pour l'instant.

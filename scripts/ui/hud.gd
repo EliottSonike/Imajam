@@ -98,6 +98,9 @@ func _ready() -> void:
 	Events.map_taken.connect(func() -> void: _show_toast("Carte récupérée"))
 	Events.vision_changed.connect(func(_v: bool) -> void: _update_status())
 	Events.power_changed.connect(_on_power_changed)
+	Events.gun_drawn.connect(func(on: bool) -> void:
+		if on:
+			_show_toast("Arme dégainée  —  clic gauche pour tirer"))
 	_update_status()
 
 
@@ -199,9 +202,9 @@ func _update_status() -> void:
 	if not GameState.vision_impaired:
 		_status.text = ""
 	elif GameState.has_item(GameState.ITEM_MEDS):
-		_status.text = "VISION TROUBLE  —  [R] prendre un médicament"
+		_status.text = "VISION TROUBLE  —  encore un coup et tu y passes  ·  [R] prendre un médicament"
 	else:
-		_status.text = "VISION TROUBLE  —  il te faut des médicaments (infirmerie)"
+		_status.text = "VISION TROUBLE  —  encore un coup et tu y passes  ·  médicaments à l'infirmerie"
 
 
 func _on_power_changed(_on: bool) -> void:

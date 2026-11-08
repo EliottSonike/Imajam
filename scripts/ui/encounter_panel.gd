@@ -116,7 +116,9 @@ func _on_choice(killed: bool) -> void:
 	GameState.resolve_prisoner(id, killed)
 	Events.encounter_resolved.emit(id, killed)
 	await get_tree().create_timer(1.5, false).timeout
-	GameState.set_vision_impaired(true)
+	GameState.hurt()  # il a eu le temps de frapper (coup de couteau)
+	if GameState.is_dead():
+		return
 	var p := get_tree().get_first_node_in_group(&"player") as Player
 	if p:
 		p.set_lock(&"encounter", false)

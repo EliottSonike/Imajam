@@ -33,6 +33,12 @@ signal screamer
 signal player_caught
 signal talk_requested(prisoner: Node)  # ouvrir la négociation (détenu 2)
 signal talk_finished(prisoner_id: int, success: bool)
+signal prisoner_fled(prisoner_id: int)  # le détenu 1 bouscule le garde et s'enfuit : la traque commence
+
+# Garde
+signal player_hurt(health: int)
+signal player_died
+signal gun_drawn(drawn: bool)
 
 # Fin
 signal ending_reached(ending: int)

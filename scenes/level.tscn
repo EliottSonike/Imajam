@@ -1,11 +1,10 @@
 [gd_scene format=3 uid="uid://b3qo55377yqgh"]
 
-[ext_resource type="PackedScene" path="res://models/prison.glb" id="1_prison"]
-[ext_resource type="Script" path="res://scripts/world/decor.gd" id="2_decor"]
+[ext_resource type="PackedScene" uid="uid://dtq4gfnrxxxmp" path="res://models/prison.glb" id="1_prison"]
+[ext_resource type="Script" uid="uid://os8s4m8ix4ds" path="res://scripts/world/decor.gd" id="2_decor"]
 
 [sub_resource type="Environment" id="Environment_nuit"]
 background_mode = 1
-background_color = Color(0, 0, 0, 1)
 ambient_light_source = 2
 ambient_light_color = Color(0.55, 0.6, 0.66, 1)
 ambient_light_energy = 0.12
@@ -13,29 +12,29 @@ tonemap_mode = 2
 ssao_enabled = true
 glow_enabled = true
 
-[sub_resource type="BoxMesh" id="BoxMesh_neon"]
-size = Vector3(0.9, 0.04, 0.16)
-
 [sub_resource type="StandardMaterial3D" id="Mat_neon"]
 albedo_color = Color(1, 0.96, 0.85, 1)
 emission_enabled = true
 emission = Color(1, 0.93, 0.75, 1)
 emission_energy_multiplier = 2.5
 
+[sub_resource type="BoxMesh" id="BoxMesh_neon"]
+size = Vector3(0.9, 0.04, 0.16)
+
 [node name="Level" type="Node3D" unique_id=1209498660]
 
-[node name="Prison" parent="." instance=ExtResource("1_prison")]
+[node name="Prison" parent="." unique_id=286484193 instance=ExtResource("1_prison")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.2, 0, -28)
 
-[node name="Decor" type="Node3D" parent="."]
+[node name="Decor" type="Node3D" parent="." unique_id=97140989]
 script = ExtResource("2_decor")
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="." groups=["world_env"]]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=661640085 groups=["world_env"]]
 environment = SubResource("Environment_nuit")
 
-[node name="Lumieres" type="Node3D" parent="."]
+[node name="Lumieres" type="Node3D" parent="." unique_id=1580362295]
 
-[node name="L_salle_B_0" type="OmniLight3D" parent="Lumieres" groups=["power_lights"]]
+[node name="L_salle_B_0" type="OmniLight3D" parent="Lumieres" unique_id=1827967741 groups=["power_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.7, 0)
 light_color = Color(1, 0.9, 0.72, 1)
 light_energy = 1.1
@@ -43,27 +42,28 @@ shadow_enabled = true
 omni_range = 6.0
 omni_attenuation = 1.4
 
-[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_salle_B_0" groups=["power_lamps"]]
+[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_salle_B_0" unique_id=913577200 groups=["power_lamps"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("Mat_neon")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_neon")
-material_override = SubResource("Mat_neon")
 
-[node name="L_salle_1_0" type="OmniLight3D" parent="Lumieres" groups=["power_lights"]]
+[node name="L_salle_1_0" type="OmniLight3D" parent="Lumieres" unique_id=1744718604 groups=["power_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 2.7, -24.5)
+visible = false
 light_color = Color(1, 0.9, 0.72, 1)
 light_energy = 0.8
 shadow_enabled = true
 omni_range = 6.0
 omni_attenuation = 1.4
 
-[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_salle_1_0" groups=["power_lamps"]]
+[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_salle_1_0" unique_id=1476783317 groups=["power_lamps"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("Mat_neon")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_neon")
-material_override = SubResource("Mat_neon")
 
-[node name="L_salle_2_0" type="OmniLight3D" parent="Lumieres" groups=["power_lights"]]
+[node name="L_salle_2_0" type="OmniLight3D" parent="Lumieres" unique_id=112614158 groups=["power_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 42.7, 2.7, -4.9)
 light_color = Color(1, 0.9, 0.72, 1)
 light_energy = 0.8
@@ -71,13 +71,13 @@ shadow_enabled = true
 omni_range = 6.0
 omni_attenuation = 1.4
 
-[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_salle_2_0" groups=["power_lamps"]]
+[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_salle_2_0" unique_id=1911207162 groups=["power_lamps"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("Mat_neon")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_neon")
-material_override = SubResource("Mat_neon")
 
-[node name="L_salle_3_0" type="OmniLight3D" parent="Lumieres" groups=["power_lights"]]
+[node name="L_salle_3_0" type="OmniLight3D" parent="Lumieres" unique_id=224540322 groups=["power_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.7, 2.7, -11.9)
 light_color = Color(1, 0.9, 0.72, 1)
 light_energy = 0.8
@@ -85,13 +85,13 @@ shadow_enabled = true
 omni_range = 6.0
 omni_attenuation = 1.4
 
-[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_salle_3_0" groups=["power_lamps"]]
+[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_salle_3_0" unique_id=1243189538 groups=["power_lamps"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("Mat_neon")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_neon")
-material_override = SubResource("Mat_neon")
 
-[node name="L_salle_R_0" type="OmniLight3D" parent="Lumieres" groups=["power_lights"]]
+[node name="L_salle_R_0" type="OmniLight3D" parent="Lumieres" unique_id=785009738 groups=["power_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.9, 2.7, -13.3)
 light_color = Color(1, 0.9, 0.72, 1)
 light_energy = 1.1
@@ -99,13 +99,13 @@ shadow_enabled = true
 omni_range = 6.0
 omni_attenuation = 1.4
 
-[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_salle_R_0" groups=["power_lamps"]]
+[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_salle_R_0" unique_id=12261431 groups=["power_lamps"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("Mat_neon")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_neon")
-material_override = SubResource("Mat_neon")
 
-[node name="L_salle_I_0" type="OmniLight3D" parent="Lumieres" groups=["power_lights"]]
+[node name="L_salle_I_0" type="OmniLight3D" parent="Lumieres" unique_id=912728243 groups=["power_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25.2, 2.7, -12.6)
 light_color = Color(1, 0.9, 0.72, 1)
 light_energy = 1.1
@@ -113,13 +113,13 @@ shadow_enabled = true
 omni_range = 6.0
 omni_attenuation = 1.4
 
-[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_salle_I_0" groups=["power_lamps"]]
+[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_salle_I_0" unique_id=1708748472 groups=["power_lamps"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("Mat_neon")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_neon")
-material_override = SubResource("Mat_neon")
 
-[node name="L_salle_G_0" type="OmniLight3D" parent="Lumieres" groups=["power_lights"]]
+[node name="L_salle_G_0" type="OmniLight3D" parent="Lumieres" unique_id=310916136 groups=["power_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 42, 2.7, -25.2)
 light_color = Color(1, 0.9, 0.72, 1)
 light_energy = 1.1
@@ -127,13 +127,13 @@ shadow_enabled = true
 omni_range = 6.0
 omni_attenuation = 1.4
 
-[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_salle_G_0" groups=["power_lamps"]]
+[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_salle_G_0" unique_id=1008427729 groups=["power_lamps"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("Mat_neon")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_neon")
-material_override = SubResource("Mat_neon")
 
-[node name="L_salle_F_0" type="OmniLight3D" parent="Lumieres" groups=["power_lights"]]
+[node name="L_salle_F_0" type="OmniLight3D" parent="Lumieres" unique_id=181549530 groups=["power_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.744, 2.7, -23.1)
 light_color = Color(1, 0.9, 0.72, 1)
 light_energy = 1.1
@@ -141,13 +141,13 @@ shadow_enabled = true
 omni_range = 7.5
 omni_attenuation = 1.4
 
-[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_salle_F_0" groups=["power_lamps"]]
+[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_salle_F_0" unique_id=1082628448 groups=["power_lamps"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("Mat_neon")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_neon")
-material_override = SubResource("Mat_neon")
 
-[node name="L_salle_F_1" type="OmniLight3D" parent="Lumieres" groups=["power_lights"]]
+[node name="L_salle_F_1" type="OmniLight3D" parent="Lumieres" unique_id=150523902 groups=["power_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21.056, 2.7, -23.1)
 light_color = Color(1, 0.9, 0.72, 1)
 light_energy = 1.1
@@ -155,13 +155,13 @@ shadow_enabled = true
 omni_range = 7.5
 omni_attenuation = 1.4
 
-[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_salle_F_1" groups=["power_lamps"]]
+[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_salle_F_1" unique_id=353523107 groups=["power_lamps"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("Mat_neon")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_neon")
-material_override = SubResource("Mat_neon")
 
-[node name="L_salle_K_0" type="OmniLight3D" parent="Lumieres" groups=["power_lights"]]
+[node name="L_salle_K_0" type="OmniLight3D" parent="Lumieres" unique_id=1492052060 groups=["power_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 2.7, -23.8)
 light_color = Color(1, 0.9, 0.72, 1)
 light_energy = 1.1
@@ -169,13 +169,13 @@ shadow_enabled = true
 omni_range = 6.0
 omni_attenuation = 1.4
 
-[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_salle_K_0" groups=["power_lamps"]]
+[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_salle_K_0" unique_id=1872856961 groups=["power_lamps"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("Mat_neon")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_neon")
-material_override = SubResource("Mat_neon")
 
-[node name="L_salle_D_0" type="OmniLight3D" parent="Lumieres" groups=["power_lights"]]
+[node name="L_salle_D_0" type="OmniLight3D" parent="Lumieres" unique_id=2060976703 groups=["power_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.8, 2.7, -4.9)
 light_color = Color(1, 0.9, 0.72, 1)
 light_energy = 1.1
@@ -183,13 +183,13 @@ shadow_enabled = true
 omni_range = 6.0
 omni_attenuation = 1.4
 
-[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_salle_D_0" groups=["power_lamps"]]
+[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_salle_D_0" unique_id=185921345 groups=["power_lamps"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("Mat_neon")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_neon")
-material_override = SubResource("Mat_neon")
 
-[node name="L_salle_L_0" type="OmniLight3D" parent="Lumieres" groups=["power_lights"]]
+[node name="L_salle_L_0" type="OmniLight3D" parent="Lumieres" unique_id=1574321623 groups=["power_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34.3, 2.7, -14.7)
 light_color = Color(1, 0.9, 0.72, 1)
 light_energy = 1.1
@@ -197,13 +197,13 @@ shadow_enabled = true
 omni_range = 6.0
 omni_attenuation = 1.4
 
-[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_salle_L_0" groups=["power_lamps"]]
+[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_salle_L_0" unique_id=2051139168 groups=["power_lamps"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("Mat_neon")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_neon")
-material_override = SubResource("Mat_neon")
 
-[node name="L_salle_V_0" type="OmniLight3D" parent="Lumieres" groups=["power_lights"]]
+[node name="L_salle_V_0" type="OmniLight3D" parent="Lumieres" unique_id=1245314342 groups=["power_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.7, 2.7, -0.7)
 light_color = Color(1, 0.9, 0.72, 1)
 light_energy = 1.1
@@ -211,13 +211,13 @@ shadow_enabled = true
 omni_range = 6.0
 omni_attenuation = 1.4
 
-[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_salle_V_0" groups=["power_lamps"]]
+[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_salle_V_0" unique_id=1197846280 groups=["power_lamps"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("Mat_neon")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_neon")
-material_override = SubResource("Mat_neon")
 
-[node name="L_salle_A_0" type="OmniLight3D" parent="Lumieres" groups=["power_lights"]]
+[node name="L_salle_A_0" type="OmniLight3D" parent="Lumieres" unique_id=1360514213 groups=["power_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.9, 2.7, -7.7)
 light_color = Color(1, 0.9, 0.72, 1)
 light_energy = 1.1
@@ -225,13 +225,13 @@ shadow_enabled = true
 omni_range = 6.0
 omni_attenuation = 1.4
 
-[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_salle_A_0" groups=["power_lamps"]]
+[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_salle_A_0" unique_id=192553483 groups=["power_lamps"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("Mat_neon")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_neon")
-material_override = SubResource("Mat_neon")
 
-[node name="L_salle_P_0" type="OmniLight3D" parent="Lumieres" groups=["power_lights"]]
+[node name="L_salle_P_0" type="OmniLight3D" parent="Lumieres" unique_id=1751673600 groups=["power_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.36, 2.7, 1.4)
 light_color = Color(1, 0.9, 0.72, 1)
 light_energy = 1.1
@@ -239,13 +239,13 @@ shadow_enabled = true
 omni_range = 7.5
 omni_attenuation = 1.4
 
-[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_salle_P_0" groups=["power_lamps"]]
+[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_salle_P_0" unique_id=515249253 groups=["power_lamps"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("Mat_neon")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_neon")
-material_override = SubResource("Mat_neon")
 
-[node name="L_salle_P_1" type="OmniLight3D" parent="Lumieres" groups=["power_lights"]]
+[node name="L_salle_P_1" type="OmniLight3D" parent="Lumieres" unique_id=331094387 groups=["power_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20.44, 2.7, 1.4)
 light_color = Color(1, 0.9, 0.72, 1)
 light_energy = 1.1
@@ -253,498 +253,463 @@ shadow_enabled = true
 omni_range = 7.5
 omni_attenuation = 1.4
 
-[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_salle_P_1" groups=["power_lamps"]]
+[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_salle_P_1" unique_id=199171158 groups=["power_lamps"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("Mat_neon")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_neon")
-material_override = SubResource("Mat_neon")
 
-[node name="L_couloir_00" type="OmniLight3D" parent="Lumieres" groups=["power_lights"]]
+[node name="L_couloir_00" type="OmniLight3D" parent="Lumieres" unique_id=1773969759 groups=["power_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24.5, 2.7, -24.5)
 light_color = Color(1, 0.9, 0.72, 1)
 light_energy = 0.9
 shadow_enabled = true
-omni_range = 5.0
 omni_attenuation = 1.4
 
-[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_00" groups=["power_lamps"]]
+[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_00" unique_id=1208062829 groups=["power_lamps"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("Mat_neon")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_neon")
-material_override = SubResource("Mat_neon")
 
-[node name="L_couloir_01" type="OmniLight3D" parent="Lumieres" groups=["power_lights"]]
+[node name="L_couloir_01" type="OmniLight3D" parent="Lumieres" unique_id=1389816874 groups=["power_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.3, 2.7, -23.1)
 light_color = Color(1, 0.9, 0.72, 1)
 light_energy = 0.9
 shadow_enabled = true
-omni_range = 5.0
 omni_attenuation = 1.4
 
-[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_01" groups=["power_lamps"]]
+[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_01" unique_id=464287446 groups=["power_lamps"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("Mat_neon")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_neon")
-material_override = SubResource("Mat_neon")
 
-[node name="L_couloir_02" type="OmniLight3D" parent="Lumieres" groups=["power_lights"]]
+[node name="L_couloir_02" type="OmniLight3D" parent="Lumieres" unique_id=847436792 groups=["power_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.1, 2.7, -21.7)
 light_color = Color(1, 0.9, 0.72, 1)
 light_energy = 0.9
 shadow_enabled = true
-omni_range = 5.0
 omni_attenuation = 1.4
 
-[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_02" groups=["power_lamps"]]
+[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_02" unique_id=1655249831 groups=["power_lamps"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("Mat_neon")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_neon")
-material_override = SubResource("Mat_neon")
 
-[node name="L_couloir_03" type="OmniLight3D" parent="Lumieres" groups=["power_lights"]]
+[node name="L_couloir_03" type="OmniLight3D" parent="Lumieres" unique_id=1774029711 groups=["power_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 2.7, -21.7)
 light_color = Color(1, 0.9, 0.72, 1)
 light_energy = 0.9
 shadow_enabled = true
-omni_range = 5.0
 omni_attenuation = 1.4
 
-[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_03" groups=["power_lamps"]]
+[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_03" unique_id=1531800191 groups=["power_lamps"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("Mat_neon")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_neon")
-material_override = SubResource("Mat_neon")
 
-[node name="L_couloir_04" type="OmniLight3D" parent="Lumieres" groups=["power_lights"]]
+[node name="L_couloir_04" type="OmniLight3D" parent="Lumieres" unique_id=1971648413 groups=["power_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 41.3, 2.7, -21.7)
 light_color = Color(1, 0.9, 0.72, 1)
 light_energy = 0.9
 shadow_enabled = true
-omni_range = 5.0
 omni_attenuation = 1.4
 
-[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_04" groups=["power_lamps"]]
+[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_04" unique_id=1509906762 groups=["power_lamps"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("Mat_neon")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_neon")
-material_override = SubResource("Mat_neon")
 
-[node name="L_couloir_05" type="OmniLight3D" parent="Lumieres" groups=["power_lights"]]
+[node name="L_couloir_05" type="OmniLight3D" parent="Lumieres" unique_id=1865504566 groups=["power_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27.3, 2.7, -20.3)
 light_color = Color(1, 0.9, 0.72, 1)
 light_energy = 0.9
 shadow_enabled = true
-omni_range = 5.0
 omni_attenuation = 1.4
 
-[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_05" groups=["power_lamps"]]
+[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_05" unique_id=465274272 groups=["power_lamps"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("Mat_neon")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_neon")
-material_override = SubResource("Mat_neon")
 
-[node name="L_couloir_06" type="OmniLight3D" parent="Lumieres" groups=["power_lights"]]
+[node name="L_couloir_06" type="OmniLight3D" parent="Lumieres" unique_id=134292617 groups=["power_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.5, 2.7, -18.9)
 light_color = Color(1, 0.9, 0.72, 1)
 light_energy = 0.9
 shadow_enabled = true
-omni_range = 5.0
 omni_attenuation = 1.4
 
-[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_06" groups=["power_lamps"]]
+[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_06" unique_id=548713768 groups=["power_lamps"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("Mat_neon")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_neon")
-material_override = SubResource("Mat_neon")
 
-[node name="L_couloir_07" type="OmniLight3D" parent="Lumieres" groups=["power_lights"]]
+[node name="L_couloir_07" type="OmniLight3D" parent="Lumieres" unique_id=947460667 groups=["power_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18.9, 2.7, -18.9)
 light_color = Color(1, 0.9, 0.72, 1)
 light_energy = 0.9
 shadow_enabled = true
-omni_range = 5.0
 omni_attenuation = 1.4
 
-[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_07" groups=["power_lamps"]]
+[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_07" unique_id=617364389 groups=["power_lamps"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("Mat_neon")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_neon")
-material_override = SubResource("Mat_neon")
 
-[node name="L_couloir_08" type="OmniLight3D" parent="Lumieres" groups=["power_lights"]]
+[node name="L_couloir_08" type="OmniLight3D" parent="Lumieres" unique_id=1875839534 groups=["power_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 37.1, 2.7, -18.9)
 light_color = Color(1, 0.9, 0.72, 1)
 light_energy = 0.9
 shadow_enabled = true
-omni_range = 5.0
 omni_attenuation = 1.4
 
-[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_08" groups=["power_lamps"]]
+[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_08" unique_id=1514412584 groups=["power_lamps"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("Mat_neon")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_neon")
-material_override = SubResource("Mat_neon")
 
-[node name="L_couloir_09" type="OmniLight3D" parent="Lumieres" groups=["power_lights"]]
+[node name="L_couloir_09" type="OmniLight3D" parent="Lumieres" unique_id=1897623873 groups=["power_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.5, 2.7, -17.5)
 light_color = Color(1, 0.9, 0.72, 1)
 light_energy = 0.9
 shadow_enabled = true
-omni_range = 5.0
 omni_attenuation = 1.4
 
-[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_09" groups=["power_lamps"]]
+[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_09" unique_id=1191987571 groups=["power_lamps"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("Mat_neon")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_neon")
-material_override = SubResource("Mat_neon")
 
-[node name="L_couloir_10" type="OmniLight3D" parent="Lumieres" groups=["power_lights"]]
+[node name="L_couloir_10" type="OmniLight3D" parent="Lumieres" unique_id=2127215083 groups=["power_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.1, 2.7, -16.1)
 light_color = Color(1, 0.9, 0.72, 1)
 light_energy = 0.9
 shadow_enabled = true
-omni_range = 5.0
 omni_attenuation = 1.4
 
-[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_10" groups=["power_lamps"]]
+[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_10" unique_id=764873259 groups=["power_lamps"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("Mat_neon")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_neon")
-material_override = SubResource("Mat_neon")
 
-[node name="L_couloir_11" type="OmniLight3D" parent="Lumieres" groups=["power_lights"]]
+[node name="L_couloir_11" type="OmniLight3D" parent="Lumieres" unique_id=1503540872 groups=["power_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 2.7, -16.1)
 light_color = Color(1, 0.9, 0.72, 1)
 light_energy = 0.9
 shadow_enabled = true
-omni_range = 5.0
 omni_attenuation = 1.4
 
-[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_11" groups=["power_lamps"]]
+[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_11" unique_id=1895882383 groups=["power_lamps"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("Mat_neon")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_neon")
-material_override = SubResource("Mat_neon")
 
-[node name="L_couloir_12" type="OmniLight3D" parent="Lumieres" groups=["power_lights"]]
+[node name="L_couloir_12" type="OmniLight3D" parent="Lumieres" unique_id=1131600625 groups=["power_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 41.3, 2.7, -16.1)
 light_color = Color(1, 0.9, 0.72, 1)
 light_energy = 0.9
 shadow_enabled = true
-omni_range = 5.0
 omni_attenuation = 1.4
 
-[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_12" groups=["power_lamps"]]
+[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_12" unique_id=1853015196 groups=["power_lamps"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("Mat_neon")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_neon")
-material_override = SubResource("Mat_neon")
 
-[node name="L_couloir_13" type="OmniLight3D" parent="Lumieres" groups=["power_lights"]]
+[node name="L_couloir_13" type="OmniLight3D" parent="Lumieres" unique_id=1681705924 groups=["power_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 46.9, 2.7, -16.1)
 light_color = Color(1, 0.9, 0.72, 1)
 light_energy = 0.9
 shadow_enabled = true
-omni_range = 5.0
 omni_attenuation = 1.4
 
-[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_13" groups=["power_lamps"]]
+[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_13" unique_id=453452680 groups=["power_lamps"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("Mat_neon")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_neon")
-material_override = SubResource("Mat_neon")
 
-[node name="L_couloir_14" type="OmniLight3D" parent="Lumieres" groups=["power_lights"]]
+[node name="L_couloir_14" type="OmniLight3D" parent="Lumieres" unique_id=1766947374 groups=["power_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21.7, 2.7, -14.7)
 light_color = Color(1, 0.9, 0.72, 1)
 light_energy = 0.9
 shadow_enabled = true
-omni_range = 5.0
 omni_attenuation = 1.4
 
-[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_14" groups=["power_lamps"]]
+[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_14" unique_id=1135718941 groups=["power_lamps"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("Mat_neon")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_neon")
-material_override = SubResource("Mat_neon")
 
-[node name="L_couloir_15" type="OmniLight3D" parent="Lumieres" groups=["power_lights"]]
+[node name="L_couloir_15" type="OmniLight3D" parent="Lumieres" unique_id=996532302 groups=["power_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.1, 2.7, -13.3)
 light_color = Color(1, 0.9, 0.72, 1)
 light_energy = 0.9
 shadow_enabled = true
-omni_range = 5.0
 omni_attenuation = 1.4
 
-[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_15" groups=["power_lamps"]]
+[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_15" unique_id=724272073 groups=["power_lamps"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("Mat_neon")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_neon")
-material_override = SubResource("Mat_neon")
 
-[node name="L_couloir_16" type="OmniLight3D" parent="Lumieres" groups=["power_lights"]]
+[node name="L_couloir_16" type="OmniLight3D" parent="Lumieres" unique_id=1526003084 groups=["power_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.7, 2.7, -11.9)
 light_color = Color(1, 0.9, 0.72, 1)
 light_energy = 0.9
 shadow_enabled = true
-omni_range = 5.0
 omni_attenuation = 1.4
 
-[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_16" groups=["power_lamps"]]
+[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_16" unique_id=2119094479 groups=["power_lamps"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("Mat_neon")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_neon")
-material_override = SubResource("Mat_neon")
 
-[node name="L_couloir_17" type="OmniLight3D" parent="Lumieres" groups=["power_lights"]]
+[node name="L_couloir_17" type="OmniLight3D" parent="Lumieres" unique_id=1573957199 groups=["power_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.5, 2.7, -11.9)
 light_color = Color(1, 0.9, 0.72, 1)
 light_energy = 0.9
 shadow_enabled = true
-omni_range = 5.0
 omni_attenuation = 1.4
 
-[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_17" groups=["power_lamps"]]
+[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_17" unique_id=740360527 groups=["power_lamps"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("Mat_neon")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_neon")
-material_override = SubResource("Mat_neon")
 
-[node name="L_couloir_18" type="OmniLight3D" parent="Lumieres" groups=["power_lights"]]
+[node name="L_couloir_18" type="OmniLight3D" parent="Lumieres" unique_id=585154105 groups=["power_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 37.1, 2.7, -11.9)
 light_color = Color(1, 0.9, 0.72, 1)
 light_energy = 0.9
 shadow_enabled = true
-omni_range = 5.0
 omni_attenuation = 1.4
 
-[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_18" groups=["power_lamps"]]
+[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_18" unique_id=16130215 groups=["power_lamps"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("Mat_neon")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_neon")
-material_override = SubResource("Mat_neon")
 
-[node name="L_couloir_19" type="OmniLight3D" parent="Lumieres" groups=["power_lights"]]
+[node name="L_couloir_19" type="OmniLight3D" parent="Lumieres" unique_id=85406846 groups=["power_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 46.9, 2.7, -10.5)
 light_color = Color(1, 0.9, 0.72, 1)
 light_energy = 0.9
 shadow_enabled = true
-omni_range = 5.0
 omni_attenuation = 1.4
 
-[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_19" groups=["power_lamps"]]
+[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_19" unique_id=614237934 groups=["power_lamps"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("Mat_neon")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_neon")
-material_override = SubResource("Mat_neon")
 
-[node name="L_couloir_20" type="OmniLight3D" parent="Lumieres" groups=["power_lights"]]
+[node name="L_couloir_20" type="OmniLight3D" parent="Lumieres" unique_id=1762630179 groups=["power_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.7, 2.7, -9.1)
 light_color = Color(1, 0.9, 0.72, 1)
 light_energy = 0.9
 shadow_enabled = true
-omni_range = 5.0
 omni_attenuation = 1.4
 
-[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_20" groups=["power_lamps"]]
+[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_20" unique_id=567160721 groups=["power_lamps"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("Mat_neon")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_neon")
-material_override = SubResource("Mat_neon")
 
-[node name="L_couloir_21" type="OmniLight3D" parent="Lumieres" groups=["power_lights"]]
+[node name="L_couloir_21" type="OmniLight3D" parent="Lumieres" unique_id=705127903 groups=["power_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21.7, 2.7, -9.1)
 light_color = Color(1, 0.9, 0.72, 1)
 light_energy = 0.9
 shadow_enabled = true
-omni_range = 5.0
 omni_attenuation = 1.4
 
-[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_21" groups=["power_lamps"]]
+[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_21" unique_id=953306721 groups=["power_lamps"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("Mat_neon")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_neon")
-material_override = SubResource("Mat_neon")
 
-[node name="L_couloir_22" type="OmniLight3D" parent="Lumieres" groups=["power_lights"]]
+[node name="L_couloir_22" type="OmniLight3D" parent="Lumieres" unique_id=455169678 groups=["power_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27.3, 2.7, -9.1)
 light_color = Color(1, 0.9, 0.72, 1)
 light_energy = 0.9
 shadow_enabled = true
-omni_range = 5.0
 omni_attenuation = 1.4
 
-[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_22" groups=["power_lamps"]]
+[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_22" unique_id=629947699 groups=["power_lamps"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("Mat_neon")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_neon")
-material_override = SubResource("Mat_neon")
 
-[node name="L_couloir_23" type="OmniLight3D" parent="Lumieres" groups=["power_lights"]]
+[node name="L_couloir_23" type="OmniLight3D" parent="Lumieres" unique_id=1767148617 groups=["power_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 41.3, 2.7, -9.1)
 light_color = Color(1, 0.9, 0.72, 1)
 light_energy = 0.9
 shadow_enabled = true
-omni_range = 5.0
 omni_attenuation = 1.4
 
-[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_23" groups=["power_lamps"]]
+[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_23" unique_id=205088783 groups=["power_lamps"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("Mat_neon")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_neon")
-material_override = SubResource("Mat_neon")
 
-[node name="L_couloir_24" type="OmniLight3D" parent="Lumieres" groups=["power_lights"]]
+[node name="L_couloir_24" type="OmniLight3D" parent="Lumieres" unique_id=1369202024 groups=["power_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.1, 2.7, -7.7)
 light_color = Color(1, 0.9, 0.72, 1)
 light_energy = 0.9
 shadow_enabled = true
-omni_range = 5.0
 omni_attenuation = 1.4
 
-[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_24" groups=["power_lamps"]]
+[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_24" unique_id=501882303 groups=["power_lamps"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("Mat_neon")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_neon")
-material_override = SubResource("Mat_neon")
 
-[node name="L_couloir_25" type="OmniLight3D" parent="Lumieres" groups=["power_lights"]]
+[node name="L_couloir_25" type="OmniLight3D" parent="Lumieres" unique_id=744691153 groups=["power_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.7, 2.7, -6.3)
 light_color = Color(1, 0.9, 0.72, 1)
 light_energy = 0.9
 shadow_enabled = true
-omni_range = 5.0
 omni_attenuation = 1.4
 
-[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_25" groups=["power_lamps"]]
+[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_25" unique_id=301762740 groups=["power_lamps"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("Mat_neon")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_neon")
-material_override = SubResource("Mat_neon")
 
-[node name="L_couloir_26" type="OmniLight3D" parent="Lumieres" groups=["power_lights"]]
+[node name="L_couloir_26" type="OmniLight3D" parent="Lumieres" unique_id=1584721274 groups=["power_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30.1, 2.7, -4.9)
 light_color = Color(1, 0.9, 0.72, 1)
 light_energy = 0.9
 shadow_enabled = true
-omni_range = 5.0
 omni_attenuation = 1.4
 
-[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_26" groups=["power_lamps"]]
+[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_26" unique_id=618165069 groups=["power_lamps"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("Mat_neon")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_neon")
-material_override = SubResource("Mat_neon")
 
-[node name="L_couloir_27" type="OmniLight3D" parent="Lumieres" groups=["power_lights"]]
+[node name="L_couloir_27" type="OmniLight3D" parent="Lumieres" unique_id=1636922682 groups=["power_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.9, 2.7, -3.5)
 light_color = Color(1, 0.9, 0.72, 1)
 light_energy = 0.9
 shadow_enabled = true
-omni_range = 5.0
 omni_attenuation = 1.4
 
-[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_27" groups=["power_lamps"]]
+[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_27" unique_id=760512581 groups=["power_lamps"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("Mat_neon")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_neon")
-material_override = SubResource("Mat_neon")
 
-[node name="L_couloir_28" type="OmniLight3D" parent="Lumieres" groups=["power_lights"]]
+[node name="L_couloir_28" type="OmniLight3D" parent="Lumieres" unique_id=249601075 groups=["power_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.9, 2.7, -3.5)
 light_color = Color(1, 0.9, 0.72, 1)
 light_energy = 0.9
 shadow_enabled = true
-omni_range = 5.0
 omni_attenuation = 1.4
 
-[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_28" groups=["power_lamps"]]
+[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_28" unique_id=485525207 groups=["power_lamps"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("Mat_neon")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_neon")
-material_override = SubResource("Mat_neon")
 
-[node name="L_couloir_29" type="OmniLight3D" parent="Lumieres" groups=["power_lights"]]
+[node name="L_couloir_29" type="OmniLight3D" parent="Lumieres" unique_id=1054599967 groups=["power_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 39.9, 2.7, -3.5)
 light_color = Color(1, 0.9, 0.72, 1)
 light_energy = 0.9
 shadow_enabled = true
-omni_range = 5.0
 omni_attenuation = 1.4
 
-[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_29" groups=["power_lamps"]]
+[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_29" unique_id=1255025801 groups=["power_lamps"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("Mat_neon")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_neon")
-material_override = SubResource("Mat_neon")
 
-[node name="L_couloir_30" type="OmniLight3D" parent="Lumieres" groups=["power_lights"]]
+[node name="L_couloir_30" type="OmniLight3D" parent="Lumieres" unique_id=666399120 groups=["power_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.5, 2.7, -2.1)
 light_color = Color(1, 0.9, 0.72, 1)
 light_energy = 0.9
 shadow_enabled = true
-omni_range = 5.0
 omni_attenuation = 1.4
 
-[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_30" groups=["power_lamps"]]
+[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_30" unique_id=1018790948 groups=["power_lamps"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("Mat_neon")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_neon")
-material_override = SubResource("Mat_neon")
 
-[node name="L_couloir_31" type="OmniLight3D" parent="Lumieres" groups=["power_lights"]]
+[node name="L_couloir_31" type="OmniLight3D" parent="Lumieres" unique_id=2008429337 groups=["power_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23.1, 2.7, -2.1)
 light_color = Color(1, 0.9, 0.72, 1)
 light_energy = 0.9
 shadow_enabled = true
-omni_range = 5.0
 omni_attenuation = 1.4
 
-[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_31" groups=["power_lamps"]]
+[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_31" unique_id=1800095799 groups=["power_lamps"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("Mat_neon")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_neon")
-material_override = SubResource("Mat_neon")
 
-[node name="L_couloir_32" type="OmniLight3D" parent="Lumieres" groups=["power_lights"]]
+[node name="L_couloir_32" type="OmniLight3D" parent="Lumieres" unique_id=1209914948 groups=["power_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30.1, 2.7, 0.7)
 light_color = Color(1, 0.9, 0.72, 1)
 light_energy = 0.9
 shadow_enabled = true
-omni_range = 5.0
 omni_attenuation = 1.4
 
-[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_32" groups=["power_lamps"]]
+[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_32" unique_id=1957248928 groups=["power_lamps"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("Mat_neon")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_neon")
-material_override = SubResource("Mat_neon")
 
-[node name="L_couloir_33" type="OmniLight3D" parent="Lumieres" groups=["power_lights"]]
+[node name="L_couloir_33" type="OmniLight3D" parent="Lumieres" unique_id=1463301852 groups=["power_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 35.7, 2.7, 2.1)
 light_color = Color(1, 0.9, 0.72, 1)
 light_energy = 0.9
 shadow_enabled = true
-omni_range = 5.0
 omni_attenuation = 1.4
 
-[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_33" groups=["power_lamps"]]
+[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_33" unique_id=2051659443 groups=["power_lamps"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("Mat_neon")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_neon")
-material_override = SubResource("Mat_neon")
 
-[node name="L_couloir_34" type="OmniLight3D" parent="Lumieres" groups=["power_lights"]]
+[node name="L_couloir_34" type="OmniLight3D" parent="Lumieres" unique_id=584287186 groups=["power_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 41.3, 2.7, 2.1)
 light_color = Color(1, 0.9, 0.72, 1)
 light_energy = 0.9
 shadow_enabled = true
-omni_range = 5.0
 omni_attenuation = 1.4
 
-[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_34" groups=["power_lamps"]]
+[node name="Neon" type="MeshInstance3D" parent="Lumieres/L_couloir_34" unique_id=1929648820 groups=["power_lamps"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("Mat_neon")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_neon")
-material_override = SubResource("Mat_neon")

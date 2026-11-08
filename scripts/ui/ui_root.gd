@@ -8,6 +8,7 @@ var document_panel: DocumentPanel
 var map_panel: MapPanel
 var inventory_panel: InventoryPanel
 var encounter_panel: EncounterPanel
+var action_panel: ActionPanel
 var talk_panel: TalkPanel
 var ending_panel: EndingPanel
 var pause_menu: PauseMenu
@@ -44,6 +45,8 @@ func _ready() -> void:
 	_root.add_child(map_panel)
 	encounter_panel = EncounterPanel.new()
 	_root.add_child(encounter_panel)
+	action_panel = ActionPanel.new()
+	_root.add_child(action_panel)
 	talk_panel = TalkPanel.new()
 	_root.add_child(talk_panel)
 	document_panel = DocumentPanel.new()
@@ -105,7 +108,7 @@ func _unhandled_input(event: InputEvent) -> void:
 func _modal_open() -> bool:
 	return document_panel.visible or map_panel.visible or inventory_panel.visible \
 		or encounter_panel.visible or ending_panel.visible or pause_menu.visible \
-		or talk_panel.visible
+		or talk_panel.visible or action_panel.visible
 
 
 func _camera_active() -> bool:

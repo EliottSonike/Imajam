@@ -155,6 +155,15 @@ func _process(delta: float) -> void:
 	_model.rotation.x = randf_range(-0.04, 0.04) * _agitation
 
 
+## Recroquevillé dans sa cellule avant son tour : il ne tourne que la tête.
+func _can_stare() -> bool:
+	return state == State.IDLE and super._can_stare()
+
+
+func _can_turn_body() -> bool:
+	return false
+
+
 ## Le couteau fait partie du modèle, accroché à la main droite.
 func _build_knife() -> void:
 	_knife = _model.find_child("Couteau", true, false) as Node3D
