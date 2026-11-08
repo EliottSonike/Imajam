@@ -234,7 +234,7 @@ func _on_player_caught() -> void:
 	if player == null:
 		return
 	player.set_lock(&"caught", true)
-	Sfx.play("scream", 0.0, 0.8)
+	Sfx.play("screamer", 0.0, 0.8)
 	Events.shake.emit(1.5)
 	Events.fade_requested.emit(true, 0.4)
 	await get_tree().create_timer(1.6).timeout
