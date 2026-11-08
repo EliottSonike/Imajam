@@ -1,6 +1,6 @@
 class_name DocumentPanel
 extends Control
-## Affiche un texte (intro, bout de journal). Se ferme avec E, Échap ou le bouton.
+## Affiche un texte (intro, bout de journal).
 
 var _panel: PanelContainer
 var _title: Label

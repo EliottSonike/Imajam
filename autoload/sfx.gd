@@ -1,9 +1,7 @@
 extends Node
 ## Sons : effets 2D (interface, téléphone, coups), boucles d'ambiance et sons 3D.
-## Les sons de assets/sounds/ sont provisoires (générés), à remplacer par de vrais sons.
 
 const DIR := "res://assets/sounds/"
-## Voix enregistrées (doublage) : assets/voix/<personnage>/<id>.ogg (ou .wav / .mp3).
 const VOICE_DIR := "res://assets/voix/"
 
 var _cache := {}
@@ -45,7 +43,7 @@ func play_at(sound: String, position: Vector3, volume_db := 0.0, unit_size := 4.
 	p.play()
 
 
-## Lance une boucle 2D (ambiance, battements de coeur…).
+## Lance une boucle 2D (ambiance, battements de coeur...).
 func loop(sound: String, volume_db := 0.0) -> void:
 	if _loops.has(sound):
 		return
@@ -69,7 +67,6 @@ func stop_all_loops() -> void:
 		stop_loop(sound)
 
 
-## Crée un lecteur 3D attaché à un nœud (pas, respiration, moteur…).
 func player_3d(parent: Node3D, sound: String, unit_size := 3.0, volume_db := 0.0, looping := true) -> AudioStreamPlayer3D:
 	var p := AudioStreamPlayer3D.new()
 	p.stream = stream(sound)
@@ -82,8 +79,6 @@ func player_3d(parent: Node3D, sound: String, unit_size := 3.0, volume_db := 0.0
 	return p
 
 
-# --- Voix (doublage) ---
-
 ## Fichier de voix d'une réplique s'il existe, sinon null.
 func voice_stream(speaker: StringName, id: String) -> AudioStream:
 	for ext in ["ogg", "wav", "mp3"]:
@@ -93,7 +88,7 @@ func voice_stream(speaker: StringName, id: String) -> AudioStream:
 	return null
 
 
-## Joue la voix d'une réplique (coupe la précédente). Renvoie sa durée, 0 s'il n'y a pas de fichier.
+## Joue la voix d'une réplique (coupe la précédente).
 func play_voice(speaker: StringName, id: String) -> float:
 	stop_voice()
 	var s := voice_stream(speaker, id)

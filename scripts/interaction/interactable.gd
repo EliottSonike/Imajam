@@ -1,10 +1,8 @@
 class_name Interactable
 extends StaticBody3D
 ## Base de tout ce qu'on vise + [E].
-## Les interactions sont sur le calque physique 3 : le rayon du joueur les touche,
-## mais le joueur ne se cogne pas dedans (sauf les portes fermées).
 
-const INTERACT_LAYER := 4  ## valeur du calque physique 3
+const INTERACT_LAYER := 4  # valeur du calque physique 3
 
 @export var prompt := ""
 @export var enabled := true
@@ -18,7 +16,6 @@ func get_prompt() -> String:
 	return "[E] " + prompt
 
 
-## Texte affiché quand on vise l'objet sans pouvoir l'utiliser (ex. « Verrouillée »).
 func get_hint() -> String:
 	return ""
 

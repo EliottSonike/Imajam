@@ -1,6 +1,6 @@
 class_name OptionsPanel
 extends Control
-## Options : volume, sensibilité de la souris, plein écran. Utilisé par le menu et la pause.
+## Options : volume, sensibilité de la souris, plein écran.
 
 signal closed
 

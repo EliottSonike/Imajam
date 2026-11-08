@@ -1,7 +1,6 @@
 class_name EncounterPanel
 extends Control
-## Confrontation : pistolet ou taser. Panneau simple en bas de l'écran pour qu'on voie le détenu.
-## Raccourcis : 1 = pistolet, 2 = taser.
+## Confrontation : pistolet ou taser.
 
 var _prisoner: Prisoner
 var _title: Label
@@ -90,7 +89,6 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 
-## Touche 1 ou 2 : rangée du haut (QWERTY et AZERTY) ou pavé numérique.
 func _is_digit(key: InputEventKey, n: int) -> bool:
 	var row := KEY_1 if n == 1 else KEY_2
 	var pad := KEY_KP_1 if n == 1 else KEY_KP_2
@@ -106,7 +104,6 @@ func _on_choice(killed: bool) -> void:
 	GameState.resolve_prisoner(id, killed)
 	Events.encounter_resolved.emit(id, killed)
 	await get_tree().create_timer(1.5).timeout
-	# l'attaque t'a sonné : vision trouble (les médicaments la soignent)
 	GameState.set_vision_impaired(true)
 	var p := get_tree().get_first_node_in_group(&"player") as Player
 	if p:

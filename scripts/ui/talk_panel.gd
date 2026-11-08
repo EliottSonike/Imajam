@@ -1,9 +1,6 @@
 class_name TalkPanel
 extends Control
-## Négociation avec le détenu 2, face à face au réfectoire. Réponses : clic ou touches 1 / 2 / 3.
-## Le score (+1 / 0 / -1 par réponse) décide s'il se calme (voir Texts.TALK_2).
-## Voix (si les fichiers existent) : detenu_2/negociation_<n>, joueur/negociation_<n>_reponse_<k>,
-## detenu_2/negociation_<n>_reaction_<k>, detenu_2/negociation_reussie / negociation_ratee.
+## Négociation avec le détenu 2, face à face au réfectoire.
 
 var _prisoner: Prisoner
 var _speaker: Label
@@ -20,7 +17,6 @@ func _ready() -> void:
 	visible = false
 	mouse_filter = Control.MOUSE_FILTER_IGNORE  # on voit le détenu au-dessus du panneau
 
-	# panneau compact collé en bas : le détenu reste visible au centre de l'écran
 	var panel := PanelContainer.new()
 	panel.anchor_left = 0.5
 	panel.anchor_right = 0.5
@@ -71,7 +67,7 @@ func _show_step() -> void:
 	Sfx.play_voice(&"detenu_2", "negociation_%d" % (_step + 1))
 	_clear_answers()
 	var order := [0, 1, 2]
-	order.shuffle()  # la bonne réponse n'est pas toujours au même endroit
+	order.shuffle()
 	for i in order.size():
 		var k: int = order[i]
 		var a: Array = ex["answers"][k]
@@ -94,7 +90,6 @@ func _on_answer(a: Array, k: int) -> void:
 	_prisoner.call(&"on_talk_answer", effect)
 	_clear_answers()
 	var n := _step + 1
-	# ta réplique, puis sa réaction (chacune avec sa voix si elle est enregistrée)
 	_you.text = "Toi : %s" % a[0]
 	_line.text = ""
 	var t_you := Sfx.play_voice(&"joueur", "negociation_%d_reponse_%d" % [n, k])
@@ -130,11 +125,10 @@ func _finish() -> void:
 
 func _clear_answers() -> void:
 	for c in _answers.get_children():
-		_answers.remove_child(c)  # tout de suite, sinon les anciens boutons comptent encore
+		_answers.remove_child(c)
 		c.queue_free()
 
 
-## Pendant la conversation : pas de pause, d'inventaire ni de changement de caméra.
 func _input(event: InputEvent) -> void:
 	if not visible:
 		return
@@ -152,7 +146,6 @@ func _input(event: InputEvent) -> void:
 			return
 
 
-## Touche 1 à 3 : rangée du haut (QWERTY et AZERTY) ou pavé numérique.
 func _is_digit(key: InputEventKey, n: int) -> bool:
 	var row: Key = [KEY_1, KEY_2, KEY_3][n - 1]
 	var pad: Key = [KEY_KP_1, KEY_KP_2, KEY_KP_3][n - 1]

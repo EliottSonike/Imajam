@@ -1,6 +1,5 @@
 extends Node
 ## Déclaration des actions d'entrée.
-## Touches physiques : ZQSD sur un clavier AZERTY = WASD sur un QWERTY.
 
 
 func _ready() -> void:

@@ -17,7 +17,7 @@ var _cam_time: Label
 var _static: ColorRect
 var _sub_timer := 0.0
 var _toast_tween: Tween
-var _clock := 2.0 * 3600.0 + 13.0 * 60.0  ## l'action commence à 02:13
+var _clock := 2.0 * 3600.0 + 13.0 * 60.0  # l'action commence à 02:13
 
 
 func _ready() -> void:
@@ -77,7 +77,6 @@ func _ready() -> void:
 	Events.interact_prompt.connect(func(t: String) -> void: _prompt.text = t)
 	Events.subtitle.connect(_on_subtitle)
 	Events.say.connect(_on_say)
-	# pendant une confrontation, les sous-titres passent au-dessus du panneau de choix
 	Events.encounter_requested.connect(func(_p: Node) -> void: _raise_subtitles(true))
 	Events.encounter_resolved.connect(func(_id: int, _k: bool) -> void: _raise_subtitles(false))
 	Events.objective_changed.connect(_on_objective)
@@ -85,7 +84,7 @@ func _ready() -> void:
 	Events.camera_viewed.connect(_on_camera_viewed)
 	Events.item_picked.connect(_on_item_picked)
 	Events.journal_picked.connect(_on_journal_picked)
-	Events.map_memorized.connect(func() -> void: _show_toast("Plan mémorisé"))
+	Events.map_taken.connect(func() -> void: _show_toast("Carte récupérée"))
 	Events.vision_changed.connect(func(_v: bool) -> void: _update_status())
 	Events.power_changed.connect(_on_power_changed)
 	_update_status()
@@ -123,7 +122,6 @@ func _raise_subtitles(up: bool) -> void:
 	_sub_panel.offset_bottom = -260.0 if up else -100.0
 
 
-## Réplique d'un personnage : « Nom : texte », ou en italique pour les pensées du garde.
 func _on_say(speaker: StringName, text: String, duration: float) -> void:
 	var who: String = Texts.SPEAKER_NAMES.get(speaker, "")
 	if who == "":
@@ -193,8 +191,6 @@ func _update_status() -> void:
 func _on_power_changed(_on: bool) -> void:
 	_update_status()
 
-
-# --- Overlay caméras ---
 
 func _build_camera_overlay() -> void:
 	_cam = Control.new()

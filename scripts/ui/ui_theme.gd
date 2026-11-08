@@ -1,15 +1,12 @@
 class_name UiTheme
 extends RefCounted
-## Thème commun à toute l'interface : sobre (gris neutres, police par défaut, boutons plats).
-## Contient aussi les petits outils pour construire les panneaux et les shaders d'écran.
 
-const ACCENT := Color(0.96, 0.96, 0.96)   ## titres
+const ACCENT := Color(0.96, 0.96, 0.96)  # titres
 const TEXT := Color(0.88, 0.88, 0.88)
 const DIM := Color(0.6, 0.6, 0.6)
 const BG := Color(0.11, 0.11, 0.12, 0.96)
 const DANGER := Color(1.0, 0.36, 0.3)
 const PAPER := Color(0.93, 0.89, 0.76)
-## Fond uni des menus (principal, pause, options, inventaire, fin).
 const MENU_COLOR := Color(0.13, 0.13, 0.14)
 
 static var _theme: Theme
@@ -75,8 +72,6 @@ static func _box(bg: Color, border: Color, border_width: int, margin: float) -> 
 	s.content_margin_bottom = margin * 0.6
 	return s
 
-
-# --- Outils de construction ---
 
 static func label(text: String, size := 18, color := TEXT) -> Label:
 	var l := Label.new()
@@ -149,9 +144,6 @@ static func shader_rect(code: String) -> ColorRect:
 	return r
 
 
-# --- Shaders d'écran ---
-
-## Lignes de balayage, grain et vignette des caméras de surveillance.
 const CAMERA_FX := """
 shader_type canvas_item;
 uniform float noise = 0.12;
@@ -178,7 +170,6 @@ void fragment() {
 }
 """
 
-## Vision troublée : image dédoublée, floue et assombrie sur les bords.
 const VISION_FX := """
 shader_type canvas_item;
 uniform sampler2D screen_tex : hint_screen_texture, filter_linear_mipmap;

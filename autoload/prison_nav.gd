@@ -1,9 +1,6 @@
 extends Node
-## Grille de la prison (le même plan que le modèle 3D, 1 caractère = 1 case de 1,4 m).
-## Sert aux déplacements des détenus (A*), à la carte et au post-it.
 
 const TILE := 1.4
-## Décalage de la prison dans level.tscn (le bureau est au centre du monde).
 const OFFSET := Vector3(-4.2, 0.0, -28.0)
 const ROOMS := "B123RIGFKDLVAPx"
 const PLAN := """
@@ -49,7 +46,6 @@ func _ready() -> void:
 	_build()
 
 
-## Zone d'une case : "C" (couloir), la lettre de la salle, ou "" (mur / vide).
 func region(t: Vector2i) -> String:
 	if t.x < 0 or t.y < 0 or t.y >= rows:
 		return ""
@@ -72,7 +68,6 @@ func is_walkable(t: Vector2i) -> bool:
 	return region(t) != ""
 
 
-## Même règle que les murs du modèle : on passe dans une même zone, ou par une porte.
 func passable(a: Vector2i, b: Vector2i) -> bool:
 	var ra := region(a)
 	var rb := region(b)
@@ -90,7 +85,6 @@ func world_to_tile(p: Vector3) -> Vector2i:
 	return Vector2i(floori(q.x / TILE), floori(q.z / TILE))
 
 
-## Position en cases (avec décimales), pour dessiner sur la carte.
 func world_to_plan(p: Vector3) -> Vector2:
 	var q := p - OFFSET
 	return Vector2(q.x / TILE, q.z / TILE)
@@ -100,7 +94,6 @@ func room_at(p: Vector3) -> String:
 	return region(world_to_tile(p))
 
 
-## Chemin de case en case entre deux points du monde (centres des cases).
 func find_path(from: Vector3, to: Vector3) -> PackedVector3Array:
 	var out := PackedVector3Array()
 	var a := _nearest_walkable(world_to_tile(from))
@@ -112,7 +105,6 @@ func find_path(from: Vector3, to: Vector3) -> PackedVector3Array:
 	return out
 
 
-## Case de couloir au hasard entre rmin et rmax mètres d'un point.
 func random_tile_near(p: Vector3, rmin: float, rmax: float, corridors_only := true) -> Vector2i:
 	var center := world_to_tile(p)
 	var r := int(ceil(rmax / TILE))

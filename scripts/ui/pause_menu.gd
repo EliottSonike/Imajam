@@ -60,7 +60,6 @@ func close() -> void:
 	Events.ui_modal_changed.emit(false)
 
 
-## Échap dans la pause : ferme les options, sinon reprend la partie.
 func handle_back() -> void:
 	if _options.visible:
 		_options.close()
