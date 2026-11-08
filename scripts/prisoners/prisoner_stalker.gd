@@ -95,6 +95,7 @@ func screamer_at(player: Player) -> void:
 	global_position = player.global_position + forward * 1.1
 	face_instant(player.global_position)
 	set_hidden_from_cameras(false)
+	_play(&"attaque", 1.3, 0.05)
 	player.set_lock(&"encounter", true)
 	Sfx.play("scream", 2.0)
 	Dialogue.say(&"detenu_3_screamer")
