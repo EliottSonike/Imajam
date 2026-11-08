@@ -1,6 +1,8 @@
 class_name MapPanel
 extends Control
-## Carte de la prison.
+## Carte de la prison. Le bouton « Retenir » la garde en mémoire : elle s'affiche alors en bas à droite.
+
+var _remember: Button
 
 func _ready() -> void:
 	UiTheme.full_rect(self)
@@ -25,12 +27,16 @@ func _ready() -> void:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 12)
 	vb.add_child(row)
+	_remember = UiTheme.button("Retenir la carte", 240)
+	_remember.pressed.connect(_on_remember)
+	row.add_child(_remember)
 	var close_btn := UiTheme.button("Fermer   [Échap]", 240)
 	close_btn.pressed.connect(close)
 	row.add_child(close_btn)
 
 
 func open() -> void:
+	_update_remember()
 	show()
 	UiTheme.pop_in(self)
 	_lock(true)
@@ -43,6 +49,18 @@ func close() -> void:
 	hide()
 	_lock(false)
 	Events.ui_modal_changed.emit(false)
+
+
+func _on_remember() -> void:
+	if not GameState.has_map:
+		Sfx.play("pickup", -8.0)
+		GameState.take_map()
+	_update_remember()
+
+
+func _update_remember() -> void:
+	_remember.disabled = GameState.has_map
+	_remember.text = "Carte retenue" if GameState.has_map else "Retenir la carte"
 
 
 func _lock(on: bool) -> void:

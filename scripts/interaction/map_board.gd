@@ -30,7 +30,8 @@ func _ready() -> void:
 
 
 func can_interact(_player: Player) -> bool:
-	return enabled and not GameState.has_map
+	# lumière allumée : on peut toujours la consulter ; dans le noir : on la décroche si on ne l'a pas
+	return enabled and (GameState.power_on or not GameState.has_map)
 
 
 func get_prompt() -> String:

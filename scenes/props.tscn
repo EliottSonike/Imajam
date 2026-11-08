@@ -1,65 +1,64 @@
 [gd_scene format=3 uid="uid://cx8ibjw75madh"]
 
-[ext_resource type="Script" path="res://scripts/interaction/security_desk.gd" id="1_desk"]
-[ext_resource type="Script" path="res://scripts/interaction/map_board.gd" id="2_map"]
-[ext_resource type="Script" path="res://scripts/interaction/generator.gd" id="3_gen"]
-[ext_resource type="Script" path="res://scripts/interaction/cell_door.gd" id="4_door"]
-[ext_resource type="Script" path="res://scripts/interaction/pickup.gd" id="5_pickup"]
-[ext_resource type="Script" path="res://scripts/interaction/journal_piece.gd" id="6_journal"]
+[ext_resource type="Script" uid="uid://dexnh56exmhkj" path="res://scripts/interaction/security_desk.gd" id="1_desk"]
+[ext_resource type="Script" uid="uid://dan22lf064yyh" path="res://scripts/interaction/map_board.gd" id="2_map"]
+[ext_resource type="Script" uid="uid://t1f2rvj7v1oi" path="res://scripts/interaction/generator.gd" id="3_gen"]
+[ext_resource type="Script" uid="uid://cpma5sj6gygvk" path="res://scripts/interaction/cell_door.gd" id="4_door"]
+[ext_resource type="Script" uid="uid://r8s72sitxtum" path="res://scripts/interaction/pickup.gd" id="5_pickup"]
+[ext_resource type="Script" uid="uid://bgyhy2u3c58jq" path="res://scripts/interaction/journal_piece.gd" id="6_journal"]
 
 [node name="Props" type="Node3D" unique_id=458627321]
 
-[node name="PosteSurveillance" type="StaticBody3D" parent="."]
+[node name="PosteSurveillance" type="StaticBody3D" parent="." unique_id=322764071]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.72, 2.2)
 script = ExtResource("1_desk")
 
-[node name="CarteDuBureau" type="StaticBody3D" parent="."]
+[node name="CarteDuBureau" type="StaticBody3D" parent="." unique_id=1749897815]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 1.55, -2.64)
 script = ExtResource("2_map")
 
-[node name="TableauGenerateur" type="StaticBody3D" parent="."]
+[node name="TableauGenerateur" type="StaticBody3D" parent="." unique_id=1153848092]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 44.6, 1.4, -24.8)
 script = ExtResource("3_gen")
 
-[node name="PorteCellule1" type="StaticBody3D" parent="."]
+[node name="PorteCellule1" type="StaticBody3D" parent="." unique_id=1546329428]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 0, -22.4)
 script = ExtResource("4_door")
 
-[node name="PorteCellule2" type="StaticBody3D" parent="."]
+[node name="PorteCellule2" type="StaticBody3D" parent="." unique_id=553510027]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 40.6, 0, -4.9)
 script = ExtResource("4_door")
 
-[node name="PorteCellule3" type="StaticBody3D" parent="."]
+[node name="PorteCellule3" type="StaticBody3D" parent="." unique_id=1869181811]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.7, 0, -9.8)
 script = ExtResource("4_door")
 
-[node name="Taser" type="StaticBody3D" parent="."]
+[node name="Taser" type="StaticBody3D" parent="." unique_id=1269901899]
 transform = Transform3D(0.939693, 0, 0.34202, 0, 1, 0, -0.34202, 0, 0.939693, 4.9, 0.755, -11.55)
 script = ExtResource("5_pickup")
 item_id = &"taser"
 
-[node name="Medicaments" type="StaticBody3D" parent="."]
+[node name="Medicaments" type="StaticBody3D" parent="." unique_id=224176024]
 transform = Transform3D(0.965926, 0, -0.258819, 0, 1, 0, 0.258819, 0, 0.965926, 24.8, 0.9, -14.85)
 script = ExtResource("5_pickup")
 item_id = &"meds"
 count = 2
 
-[node name="Journal1" type="StaticBody3D" parent="."]
+[node name="Journal1" type="StaticBody3D" parent="." unique_id=280191025]
 transform = Transform3D(0.978148, 0, 0.207912, 0, 1, 0, -0.207912, 0, 0.978148, 1.76, 0.775, -24.5)
 script = ExtResource("6_journal")
-index = 0
 
-[node name="Journal2" type="StaticBody3D" parent="."]
+[node name="Journal2" type="StaticBody3D" parent="." unique_id=1582788119]
 transform = Transform3D(0.990268, 0, -0.139173, 0, 1, 0, 0.139173, 0, 0.990268, 42.7, 0.775, -6.64)
 script = ExtResource("6_journal")
 index = 1
 
-[node name="Journal3" type="StaticBody3D" parent="."]
+[node name="Journal3" type="StaticBody3D" parent="." unique_id=1311728967]
 transform = Transform3D(0.906308, 0, 0.422618, 0, 1, 0, -0.422618, 0, 0.906308, 12.96, 0.775, -11.9)
 script = ExtResource("6_journal")
 index = 2
 
-[node name="Journal4_cache" type="StaticBody3D" parent="."]
+[node name="Journal4_cache" type="StaticBody3D" parent="." unique_id=1482565551]
 transform = Transform3D(0.939693, 0, 0.34202, 0, 1, 0, -0.34202, 0, 0.939693, 5.2, 0.005, -7.2)
 script = ExtResource("6_journal")
 index = 3
