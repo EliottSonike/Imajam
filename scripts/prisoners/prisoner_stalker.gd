@@ -26,6 +26,7 @@ var _steps: AudioStreamPlayer3D
 var _breath: AudioStreamPlayer3D
 var _wait_left := 0.0
 var _spotted := false
+var _yeux: Array[Node3D] = []
 
 
 func _ready() -> void:
@@ -33,6 +34,15 @@ func _ready() -> void:
 	_steps = Sfx.player_3d(self, "step", 3.0, 2.0, false)
 	_breath = Sfx.player_3d(self, "breath", 2.0, -3.0, true)
 	_breath.position.y = 1.5
+	_build_eyes()
+	_set_eyes(not GameState.power_on)
+	Events.power_changed.connect(_on_power_changed)
+
+
+func on_resolved(killed: bool) -> void:
+	resolved = true
+	_set_eyes(false)
+	super.on_resolved(killed)
 
 
 func start_escape() -> void:
@@ -95,6 +105,7 @@ func screamer_at(player: Player) -> void:
 	global_position = player.global_position + forward * 1.1
 	face_instant(player.global_position)
 	set_hidden_from_cameras(false)
+	_set_eyes(true)
 	_play(&"attaque", 1.3, 0.05)
 	player.set_lock(&"encounter", true)
 	Sfx.play("screamer", 2.0)
@@ -183,3 +194,48 @@ func _pick_patrol() -> void:
 		var around := player.global_position if player else global_position
 		target = PrisonNav.tile_to_world(PrisonNav.random_tile_near(around, 4.0, 14.0))
 	_set_path(PrisonNav.find_path(global_position, target), 1)
+
+
+## Yeux rouges qui s'allument quand le courant est coupé, pour le repérer dans le noir.
+func _build_eyes() -> void:
+	if _skeleton == null or _skeleton.find_bone("tete") < 0:
+		return
+	var attach := BoneAttachment3D.new()
+	attach.bone_name = "tete"
+	_skeleton.add_child(attach)
+	var to_bone := _skeleton.get_bone_global_rest(_skeleton.find_bone("tete")).affine_inverse()
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color.BLACK
+	mat.emission_enabled = true
+	mat.emission = Color(1.0, 0.06, 0.03)
+	mat.emission_energy_multiplier = 10.0
+	var mesh := SphereMesh.new()
+	mesh.radius = 0.016
+	mesh.height = 0.032
+	mesh.radial_segments = 8
+	mesh.rings = 4
+	for x in [-0.032, 0.032]:
+		var eye := MeshInstance3D.new()
+		eye.mesh = mesh
+		eye.material_override = mat
+		eye.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		eye.transform = to_bone * Transform3D(Basis(), Vector3(x, 1.665, 0.094))
+		attach.add_child(eye)
+		_yeux.append(eye)
+	# petite lueur rouge sur le visage
+	var lueur := OmniLight3D.new()
+	lueur.light_color = Color(1.0, 0.1, 0.05)
+	lueur.light_energy = 0.8
+	lueur.omni_range = 1.2
+	lueur.transform = to_bone * Transform3D(Basis(), Vector3(0.0, 1.66, 0.25))
+	attach.add_child(lueur)
+	_yeux.append(lueur)
+
+
+func _set_eyes(on: bool) -> void:
+	for n in _yeux:
+		n.visible = on and not resolved
+
+
+func _on_power_changed(on: bool) -> void:
+	_set_eyes(not on)
