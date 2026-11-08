@@ -3,12 +3,17 @@ extends Node3D
 ## Base des trois psychopathes.
 
 const HIDDEN_FROM_CAMERAS_LAYER := 2
+const MODELE := preload("res://models/prisonnier.glb")
+## Tenue par détenu (le 1 garde la combinaison orange d'origine).
+const TENUES := {
+	2: preload("res://models/prisonnier_tenue_blanc.png"),
+	3: preload("res://models/prisonnier_tenue_rouge.png"),
+}
+const ANIM_BOUCLES: Array[StringName] = [&"idle", &"marche", &"course", &"accroupi", &"assis_boucle", &"agite"]
 
 @export var prisoner_id := 0
 @export var display_name := ""
 @export var walk_speed := 1.4
-## Couleur de la capsule (orange = tenue de détenu).
-@export var body_color := Color(0.85, 0.36, 0.07)
 @export var attack_line: StringName = &""
 
 var taser_allowed := true
@@ -16,13 +21,17 @@ var taser_allowed := true
 var resolved := false
 
 var _model: Node3D
+var _anim: AnimationPlayer
+var _skeleton: Skeleton3D
+var _pose := &""  # anim imposée par le comportement (accroupi, agite...)
+var _last_pos := Vector3.ZERO
+var _speed := 0.0
 var _body: AnimatableBody3D
 var _body_shape: CollisionShape3D
 var _path := PackedVector3Array()
 var _path_i := 0
 var _moving := false
 var _busy := false
-var _t := 0.0
 var _seen_cache := false
 var _seen_check := 0.0
 
@@ -32,20 +41,34 @@ func _ready() -> void:
 	if display_name == "":
 		display_name = Texts.PRISONER_NAMES.get(prisoner_id, "")
 	_build_model()
+	_last_pos = global_position
 	Events.encounter_resolved.connect(_on_encounter_resolved)
 
 
 func _process(delta: float) -> void:
-	_t += delta
-	if resolved or _model == null:
+	if delta > 0.0:
+		var flat := global_position - _last_pos
+		flat.y = 0.0
+		_speed = lerpf(_speed, flat.length() / delta, minf(1.0, 10.0 * delta))
+	_last_pos = global_position
+	if resolved or _busy or _anim == null:
 		return
-	if _moving:
-		_model.position.y = absf(sin(_t * 9.0)) * 0.05
-		_model.rotation.z = sin(_t * 4.5) * 0.04
+	if _pose != &"":
+		_play(_pose)
+	elif _moving and _speed > 2.2:
+		_play(&"course", _speed / 3.2)
+	elif _moving and _speed > 0.2:
+		_play(&"marche", _speed / 1.4)
 	else:
-		_model.position.y = lerpf(_model.position.y, 0.0, 8.0 * delta)
-		_model.rotation.z = lerpf(_model.rotation.z, 0.0, 8.0 * delta)
-		_model.scale = Vector3(1.0, 1.0 + sin(_t * 2.0) * 0.012, 1.0)
+		_play(&"idle")
+
+
+func _play(anim_name: StringName, speed := 1.0, blend := 0.25) -> void:
+	if _anim == null or not _anim.has_animation(anim_name):
+		return
+	if _anim.current_animation != anim_name:
+		_anim.play(anim_name, blend)
+	_anim.speed_scale = clampf(speed, 0.5, 1.6)
 
 
 func start_escape() -> void:
@@ -68,6 +91,7 @@ func attack_player() -> void:
 	target.y = global_position.y
 	face_instant(player.global_position)
 	player.face_point(global_position + Vector3.UP * 1.5, 0.2)
+	_play(&"attaque", 1.0, 0.1)
 	Sfx.play("scream", -4.0, 1.25)
 	var tw := create_tween()
 	tw.tween_property(self, "global_position", target, 0.3).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
@@ -84,6 +108,9 @@ func on_resolved(killed: bool) -> void:
 	_busy = true
 	_moving = false
 	set_hidden_from_cameras(false)
+	if _anim:
+		_anim.speed_scale = 1.0
+		_anim.play(&"idle", 0.15)
 	if killed:
 		Sfx.play("gunshot")
 		Events.flash.emit(Color(1.0, 0.85, 0.55, 0.8))
@@ -97,11 +124,11 @@ func on_resolved(killed: bool) -> void:
 		await shiver.finished
 	var fall := create_tween().set_parallel()
 	fall.tween_property(_model, "rotation", Vector3(deg_to_rad(-88.0), 0.0, 0.0), 0.7).set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
-	fall.tween_property(_model, "position:y", 0.3, 0.7)
+	fall.tween_property(_model, "position:y", 0.14, 0.7)
 	_body_shape.set_deferred("disabled", true)
-	if killed:
-		for eye in _model.find_children("Oeil*", "MeshInstance3D", false, false):
-			(eye as Node3D).visible = false
+	await fall.finished
+	if _anim:
+		_anim.pause()
 
 
 func set_hidden_from_cameras(hidden: bool) -> void:
@@ -182,46 +209,53 @@ func _build_model() -> void:
 	_model.name = "Modele"
 	add_child(_model)
 
-	var body := MeshInstance3D.new()
-	body.name = "Corps"
-	var capsule := CapsuleMesh.new()
-	capsule.radius = 0.3
-	capsule.height = 1.75
-	body.mesh = capsule
-	body.position.y = 0.875
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = body_color
-	mat.roughness = 0.85
-	body.material_override = mat
-	_model.add_child(body)
+	var perso := MODELE.instantiate() as Node3D
+	perso.name = "Perso"
+	perso.rotation.y = PI  # le modèle regarde vers +Z, les détenus avancent vers -Z
+	_model.add_child(perso)
+	var skeletons := perso.find_children("*", "Skeleton3D", true, false)
+	if not skeletons.is_empty():
+		_skeleton = skeletons[0] as Skeleton3D
+	var players := perso.find_children("*", "AnimationPlayer", true, false)
+	if not players.is_empty():
+		_anim = players[0] as AnimationPlayer
+		for n in ANIM_BOUCLES:
+			if _anim.has_animation(n):
+				_anim.get_animation(n).loop_mode = Animation.LOOP_LINEAR
+		_anim.play(&"idle")
+		_anim.seek(randf() * 1.5, true)  # pour qu'ils ne respirent pas tous en même temps
 
-	var eye_mat := StandardMaterial3D.new()
-	eye_mat.albedo_color = Color(1.0, 0.1, 0.05)
-	eye_mat.emission_enabled = true
-	eye_mat.emission = Color(1.0, 0.05, 0.02)
-	eye_mat.emission_energy_multiplier = 6.0
-	for i in 2:
-		var eye := MeshInstance3D.new()
-		eye.name = "Oeil%d" % i
-		var sphere := SphereMesh.new()
-		sphere.radius = 0.03
-		sphere.height = 0.06
-		eye.mesh = sphere
-		eye.material_override = eye_mat
-		eye.position = Vector3(-0.09 if i == 0 else 0.09, 1.57, -0.27)
-		_model.add_child(eye)
+	var tenue: Texture2D = TENUES.get(prisoner_id)
+	var corps := perso.find_child("Corps", true, false) as MeshInstance3D
+	if tenue and corps:
+		var mat := corps.get_active_material(0).duplicate() as BaseMaterial3D
+		if mat:
+			mat.albedo_texture = tenue
+			corps.set_surface_override_material(0, mat)
 
-	var number := Label3D.new()
-	number.name = "Numero"
-	number.text = str(prisoner_id)
-	number.font_size = 120
-	number.pixel_size = 0.003
-	number.modulate = Color(0.05, 0.05, 0.05)
-	number.outline_size = 0
-	number.shaded = true
-	number.position = Vector3(0.0, 1.15, -0.305)
-	number.rotation.y = PI
-	_model.add_child(number)
+	var knife := perso.find_child("Couteau", true, false) as Node3D
+	if knife:
+		knife.visible = false
+
+	# numéro dans le dos, accroché à l'os du torse
+	if _skeleton and _skeleton.find_bone("torse") >= 0:
+		var bone := _skeleton.find_bone("torse")
+		var attach := BoneAttachment3D.new()
+		attach.bone_name = "torse"
+		_skeleton.add_child(attach)
+		var number := Label3D.new()
+		number.name = "Numero"
+		number.text = str(prisoner_id)
+		number.font_size = 110
+		number.pixel_size = 0.0025
+		number.modulate = Color(0.08, 0.08, 0.08)
+		number.outline_size = 0
+		number.shaded = true
+		number.double_sided = false
+		# dans le repère du squelette le dos est vers -Z
+		var wanted := Transform3D(Basis(Vector3.UP, PI), Vector3(0.0, 1.2, -0.165))
+		number.transform = _skeleton.get_bone_global_rest(bone).affine_inverse() * wanted
+		attach.add_child(number)
 
 	_body = AnimatableBody3D.new()
 	_body.sync_to_physics = false

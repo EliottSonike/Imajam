@@ -23,9 +23,11 @@ func start_escape() -> void:
 		global_position = hide_spot.global_position
 		rotation.y = hide_spot.global_rotation.y
 	_waiting = true
+	_pose = &"accroupi"
 
 
 func _on_cell_trigger_body_entered(body: Node3D) -> void:
 	if _waiting and not resolved and body is Player:
 		_waiting = false
+		_pose = &""
 		attack_player()

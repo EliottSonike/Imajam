@@ -22,13 +22,12 @@ var _leg := 0
 var _spotted_route := false
 var _spotted_refectoire := false
 var _agitation := 1.0
-var _knife: MeshInstance3D
+var _knife: Node3D
 var _twitch_t := 0.0
 var _twitch_target := 0.0
 
 
 func _ready() -> void:
-	body_color = Color(0.9, 0.9, 0.86)
 	super._ready()
 	_build_knife()
 	Events.talk_finished.connect(_on_talk_finished)
@@ -128,6 +127,7 @@ func _on_talk_finished(id: int, success: bool) -> void:
 
 
 func _process(delta: float) -> void:
+	_pose = &"agite" if state in [State.WAITING, State.REFECTOIRE, State.TALKING] else &""
 	super._process(delta)
 	if resolved or _busy or _model == null or state == State.IDLE:
 		return
@@ -139,37 +139,29 @@ func _process(delta: float) -> void:
 	_model.rotation.x = randf_range(-0.04, 0.04) * _agitation
 
 
+## Le couteau fait partie du modèle, accroché à la main droite.
 func _build_knife() -> void:
-	_knife = MeshInstance3D.new()
-	_knife.name = "Couteau"
-	var mesh := BoxMesh.new()
-	mesh.size = Vector3(0.06, 0.02, 0.46)
-	_knife.mesh = mesh
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = Color(0.82, 0.84, 0.87)
-	mat.metallic = 0.9
-	mat.roughness = 0.25
-	mat.emission_enabled = true
-	mat.emission = Color(0.45, 0.45, 0.48)  # reste visible sur les caméras
-	_knife.material_override = mat
-	_knife.position = Vector3(0.44, 0.9, -0.25)  # tenu à droite, pointé vers l'avant
-	_knife.rotation.x = deg_to_rad(-30.0)
+	_knife = _model.find_child("Couteau", true, false) as Node3D
+	if _knife == null:
+		_knife = Node3D.new()
+		_model.add_child(_knife)
 	_knife.visible = false
-	_model.add_child(_knife)
 
 
 func _drop_knife() -> void:
-	if not _knife.visible:
+	if _knife == null or not _knife.visible:
 		return
 	_knife.reparent(self)
 	var tw := create_tween().set_parallel()
 	tw.tween_property(_knife, "position", Vector3(0.35, 0.02, -0.45), 0.45).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
-	tw.tween_property(_knife, "rotation", Vector3(0.0, 0.6, 0.0), 0.45)
+	tw.tween_property(_knife, "rotation", Vector3(0.0, 0.6, PI / 2.0), 0.45)  # lame à plat
 	Sfx.play("pickup", -10.0, 0.6)
 
 
-## Il s'assoit par terre (la capsule s'enfonce un peu).
+## Il s'assoit par terre et se recroqueville.
 func _sit_down() -> void:
-	var tw := create_tween().set_parallel()
-	tw.tween_property(_model, "rotation", Vector3.ZERO, 0.6)
-	tw.tween_property(_model, "position:y", -0.55, 0.9).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	var tw := create_tween()
+	tw.tween_property(_model, "rotation", Vector3.ZERO, 0.4)
+	_play(&"assis", 1.0, 0.3)
+	if _anim:
+		_anim.queue(&"assis_boucle")

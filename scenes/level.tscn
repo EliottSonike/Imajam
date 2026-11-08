@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://b3qo55377yqgh"]
 
 [ext_resource type="PackedScene" path="res://models/prison.glb" id="1_prison"]
+[ext_resource type="Script" path="res://scripts/world/decor.gd" id="2_decor"]
 
 [sub_resource type="Environment" id="Environment_nuit"]
 background_mode = 1
@@ -25,6 +26,9 @@ emission_energy_multiplier = 2.5
 
 [node name="Prison" parent="." instance=ExtResource("1_prison")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.2, 0, -28)
+
+[node name="Decor" type="Node3D" parent="."]
+script = ExtResource("2_decor")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." groups=["world_env"]]
 environment = SubResource("Environment_nuit")
