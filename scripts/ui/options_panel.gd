@@ -14,14 +14,16 @@ func _ready() -> void:
 	visible = false
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	add_child(UiTheme.menu_bg())
+	var panel := PanelContainer.new()
+	UiTheme.centered(panel, Vector2(620, 480))
+	add_child(panel)
 	var vb := VBoxContainer.new()
-	UiTheme.centered(vb, Vector2(560, 400))
-	vb.add_theme_constant_override("separation", 16)
-	add_child(vb)
-	vb.add_child(UiTheme.label("OPTIONS", 26, UiTheme.ACCENT))
+	vb.add_theme_constant_override("separation", 14)
+	panel.add_child(vb)
+	vb.add_child(UiTheme.header("Réglages", "FORM. RG-01"))
 	vb.add_child(HSeparator.new())
 
-	vb.add_child(UiTheme.label("Volume", 18))
+	vb.add_child(UiTheme.mono("VOLUME", 14, UiTheme.AMBER))
 	_volume = HSlider.new()
 	_volume.min_value = 0.0
 	_volume.max_value = 1.0
@@ -29,7 +31,7 @@ func _ready() -> void:
 	_volume.value_changed.connect(_on_volume)
 	vb.add_child(_volume)
 
-	vb.add_child(UiTheme.label("Sensibilité de la souris", 18))
+	vb.add_child(UiTheme.mono("SENSIBILITÉ DE LA SOURIS", 14, UiTheme.AMBER))
 	_sensi = HSlider.new()
 	_sensi.min_value = 0.0005
 	_sensi.max_value = 0.006

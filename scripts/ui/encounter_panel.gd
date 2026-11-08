@@ -22,14 +22,25 @@ func _ready() -> void:
 	panel.anchor_bottom = 1.0
 	panel.offset_left = -420
 	panel.offset_right = 420
-	panel.offset_top = -230
+	panel.offset_top = -270
 	panel.offset_bottom = -40
+	panel.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	panel.add_theme_stylebox_override("panel", UiTheme.plate(true))
 	add_child(panel)
 	var vb := VBoxContainer.new()
 	vb.add_theme_constant_override("separation", 12)
 	panel.add_child(vb)
-	_title = UiTheme.label("", 22, UiTheme.ACCENT)
-	vb.add_child(_title)
+	var head := HBoxContainer.new()
+	head.add_theme_constant_override("separation", 14)
+	vb.add_child(head)
+	_title = UiTheme.title("", 26)
+	head.add_child(_title)
+	var spacer := Control.new()
+	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(spacer)
+	var alert := UiTheme.mono("● ALERTE", 14, UiTheme.DANGER)
+	alert.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	head.add_child(alert)
 	_text = UiTheme.label("", 19)
 	_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	vb.add_child(_text)
@@ -53,7 +64,7 @@ func open(prisoner: Node = null) -> void:
 	if _prisoner == null:
 		return
 	var id := _prisoner.prisoner_id
-	_title.text = "Détenu %d : %s" % [id, _prisoner.display_name]
+	_title.text = ("Détenu %d — %s" % [id, _prisoner.display_name]).to_upper()
 	_text.text = Texts.ENCOUNTERS.get(id, "Il se jette sur toi !")
 	var has_taser := GameState.has_item(GameState.ITEM_TASER)
 	_taser.disabled = not has_taser or not _prisoner.taser_allowed

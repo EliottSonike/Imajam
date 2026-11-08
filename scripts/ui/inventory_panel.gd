@@ -11,15 +11,13 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	add_child(UiTheme.menu_bg())
 
+	var plate := PanelContainer.new()
+	UiTheme.centered(plate, Vector2(1080, 660))
+	add_child(plate)
 	var root := VBoxContainer.new()
-	UiTheme.centered(root, Vector2(1000, 580))
 	root.add_theme_constant_override("separation", 12)
-	add_child(root)
-	var head := HBoxContainer.new()
-	head.add_child(UiTheme.label("INVENTAIRE", 24, UiTheme.ACCENT))
-	var spacer := Control.new()
-	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	head.add_child(spacer)
+	plate.add_child(root)
+	var head := UiTheme.header("Effets personnels", "CASIER N° 07")
 	var close_btn := UiTheme.button("Fermer   [Tab]", 200)
 	close_btn.pressed.connect(close)
 	head.add_child(close_btn)
@@ -34,7 +32,7 @@ func _ready() -> void:
 	var left := VBoxContainer.new()
 	left.custom_minimum_size = Vector2(300, 0)
 	left.add_theme_constant_override("separation", 10)
-	left.add_child(UiTheme.label("OBJETS", 18, UiTheme.DIM))
+	left.add_child(UiTheme.mono("OBJETS", 14, UiTheme.AMBER))
 	_items = VBoxContainer.new()
 	_items.add_theme_constant_override("separation", 8)
 	left.add_child(_items)
@@ -43,7 +41,7 @@ func _ready() -> void:
 	var right := VBoxContainer.new()
 	right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	right.add_theme_constant_override("separation", 10)
-	right.add_child(UiTheme.label("JOURNAL", 18, UiTheme.DIM))
+	right.add_child(UiTheme.mono("JOURNAL — PAGES RETROUVÉES", 14, UiTheme.AMBER))
 	_page = GridContainer.new()
 	_page.columns = 2
 	_page.add_theme_constant_override("h_separation", 6)
@@ -122,6 +120,9 @@ func _refresh() -> void:
 			b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 			b.add_theme_color_override("font_color", Color(0.18, 0.14, 0.1))
 			b.add_theme_color_override("font_hover_color", Color(0.45, 0.2, 0.1))
+			b.add_theme_font_override("font", load("res://assets/fonts/Caveat.ttf"))
+			b.add_theme_font_size_override("font_size", 26)
+			b.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
 			b.pressed.connect(func() -> void: Events.show_document.emit(page["title"], page["body"]))
 			cell.add_child(b)
 		else:

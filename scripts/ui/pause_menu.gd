@@ -4,7 +4,7 @@ extends Control
 
 const MENU_SCENE := "res://scenes/menu.tscn"
 
-var _box: VBoxContainer
+var _box: Control
 var _options: OptionsPanel
 
 
@@ -15,26 +15,27 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	add_child(UiTheme.menu_bg())
 
-	_box = VBoxContainer.new()
-	UiTheme.centered(_box, Vector2(340, 360))
-	_box.add_theme_constant_override("separation", 14)
+	_box = PanelContainer.new()
+	UiTheme.centered(_box, Vector2(420, 420))
 	add_child(_box)
-	var title := UiTheme.label("PAUSE", 40, UiTheme.ACCENT)
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_box.add_child(title)
-	_box.add_child(HSeparator.new())
+	var vb := VBoxContainer.new()
+	vb.add_theme_constant_override("separation", 14)
+	_box.add_child(vb)
+	vb.add_child(UiTheme.header("Pause", "PS-00", 34, UiTheme.DANGER))
+	vb.add_child(UiTheme.mono("RONDE INTERROMPUE", 12))
+	vb.add_child(HSeparator.new())
 	var resume := UiTheme.button("Reprendre")
 	resume.pressed.connect(close)
-	_box.add_child(resume)
+	vb.add_child(resume)
 	var options := UiTheme.button("Options")
 	options.pressed.connect(_open_options)
-	_box.add_child(options)
+	vb.add_child(options)
 	var menu := UiTheme.button("Menu principal")
 	menu.pressed.connect(_on_menu)
-	_box.add_child(menu)
+	vb.add_child(menu)
 	var quit := UiTheme.button("Quitter le jeu")
 	quit.pressed.connect(func() -> void: get_tree().quit())
-	_box.add_child(quit)
+	vb.add_child(quit)
 
 	_options = OptionsPanel.new()
 	_options.closed.connect(func() -> void: _box.show())

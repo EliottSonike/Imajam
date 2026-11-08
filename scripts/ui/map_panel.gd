@@ -16,7 +16,7 @@ func _ready() -> void:
 	var vb := VBoxContainer.new()
 	vb.add_theme_constant_override("separation", 12)
 	panel.add_child(vb)
-	vb.add_child(UiTheme.label("PLAN DE LA PRISON SAINT-ROCH", 24, UiTheme.ACCENT))
+	vb.add_child(UiTheme.header("Plan de la prison Saint-Roch", "RÉF. PL-07/12  ·  AILE PSY."))
 	vb.add_child(HSeparator.new())
 	var map := TextureRect.new()
 	map.texture = load(MapBoard.MAP_TEXTURE)
@@ -60,7 +60,7 @@ func _on_remember() -> void:
 
 func _update_remember() -> void:
 	_remember.disabled = GameState.has_map
-	_remember.text = "Carte retenue" if GameState.has_map else "Retenir la carte"
+	_remember.text = "CARTE RETENUE" if GameState.has_map else "RETENIR LA CARTE"
 
 
 func _lock(on: bool) -> void:

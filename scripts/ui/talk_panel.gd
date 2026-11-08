@@ -24,19 +24,18 @@ func _ready() -> void:
 	panel.anchor_bottom = 1.0
 	panel.offset_left = -460
 	panel.offset_right = 460
-	panel.offset_top = -250
+	panel.offset_top = -270
 	panel.offset_bottom = -12
 	panel.grow_vertical = Control.GROW_DIRECTION_BEGIN
-	var box := StyleBoxFlat.new()
-	box.bg_color = Color(0.1, 0.1, 0.11, 0.9)
-	box.set_corner_radius_all(4)
-	box.set_content_margin_all(14)
+	var box := UiTheme.plate()
+	box.content_margin_top = 22
+	box.content_margin_bottom = 22
 	panel.add_theme_stylebox_override("panel", box)
 	add_child(panel)
 	var vb := VBoxContainer.new()
 	vb.add_theme_constant_override("separation", 6)
 	panel.add_child(vb)
-	_speaker = UiTheme.label("", 14, UiTheme.DIM)
+	_speaker = UiTheme.mono("", 13, UiTheme.AMBER)
 	vb.add_child(_speaker)
 	_you = UiTheme.label("", 16, UiTheme.DIM)
 	_you.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -55,7 +54,7 @@ func open(prisoner: Node) -> void:
 		return
 	_step = 0
 	_score = 0
-	_speaker.text = "Détenu %d : %s" % [_prisoner.prisoner_id, _prisoner.display_name]
+	_speaker.text = "● ENTRETIEN  ·  DÉTENU %d — %s" % [_prisoner.prisoner_id, _prisoner.display_name.to_upper()]
 	show()
 	_show_step()
 
@@ -71,9 +70,10 @@ func _show_step() -> void:
 	for i in order.size():
 		var k: int = order[i]
 		var a: Array = ex["answers"][k]
-		var b := UiTheme.button("%d.  %s" % [i + 1, a[0]], 0.0)
-		b.custom_minimum_size.y = 34
-		b.add_theme_font_size_override("font_size", 16)
+		var b := UiTheme.button("%d.  %s" % [i + 1, a[0]], 0.0, false)
+		b.custom_minimum_size.y = 38
+		b.add_theme_font_size_override("font_size", 20)
+		b.add_theme_font_override("font", load("res://assets/fonts/BarlowCondensed-SemiBold.ttf"))
 		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		b.pressed.connect(_on_answer.bind(a, k + 1))
 		_answers.add_child(b)

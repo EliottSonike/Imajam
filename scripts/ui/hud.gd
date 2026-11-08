@@ -16,6 +16,7 @@ var _cam_rec: Label
 var _cam_time: Label
 var _static: ColorRect
 var _sub_timer := 0.0
+var _sub_fade: Tween
 var _toast_tween: Tween
 var _clock := 2.0 * 3600.0 + 13.0 * 60.0  # l'action commence à 02:13
 
@@ -37,7 +38,7 @@ func _ready() -> void:
 	_prompt.add_theme_constant_override("outline_size", 6)
 	add_child(_prompt)
 
-	_objective = UiTheme.label("", 17, UiTheme.ACCENT)
+	_objective = UiTheme.mono("", 15, UiTheme.AMBER)
 	_anchor(_objective, 0.0, 0.0, 24, 760, 18, 44)
 	_objective.add_theme_color_override("font_outline_color", Color.BLACK)
 	_objective.add_theme_constant_override("outline_size", 5)
@@ -66,6 +67,15 @@ func _ready() -> void:
 	_anchor(_sub_panel, 0.5, 1.0, -460, 460, -170, -100)
 	_sub_panel.modulate.a = 0.0
 	_sub_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var sub_box := StyleBoxFlat.new()
+	sub_box.bg_color = Color(0.02, 0.025, 0.02, 0.8)
+	sub_box.border_color = Color(UiTheme.AMBER, 0.5)
+	sub_box.border_width_left = 3
+	sub_box.content_margin_left = 22
+	sub_box.content_margin_right = 22
+	sub_box.content_margin_top = 10
+	sub_box.content_margin_bottom = 10
+	_sub_panel.add_theme_stylebox_override("panel", sub_box)
 	_subtitle = UiTheme.label("", 19)
 	_subtitle.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -95,7 +105,8 @@ func _process(delta: float) -> void:
 	if _sub_timer > 0.0:
 		_sub_timer -= delta
 		if _sub_timer <= 0.0:
-			create_tween().tween_property(_sub_panel, "modulate:a", 0.0, 0.4)
+			_sub_fade = create_tween()
+			_sub_fade.tween_property(_sub_panel, "modulate:a", 0.0, 0.4)
 	if _cam.visible:
 		var c := int(_clock)
 		_cam_time.text = "08/11/2026   %02d:%02d:%02d" % [floori(c / 3600.0) % 24, floori(c / 60.0) % 60, c % 60]
@@ -114,6 +125,10 @@ func _on_subtitle(text: String, duration: float) -> void:
 		return
 	_subtitle.text = text
 	_sub_timer = duration
+	# la réplique précédente finissait de s'effacer : sans ça elle emportait la nouvelle avec elle
+	if _sub_fade:
+		_sub_fade.kill()
+		_sub_fade = null
 	_sub_panel.modulate.a = 1.0
 
 
@@ -200,17 +215,17 @@ func _build_camera_overlay() -> void:
 	add_child(_cam)
 	_cam.add_child(UiTheme.shader_rect(UiTheme.CAMERA_FX))
 
-	_cam_rec = UiTheme.label("● REC", 22, UiTheme.DANGER)
+	_cam_rec = UiTheme.mono("● REC", 22, UiTheme.DANGER)
 	_anchor(_cam_rec, 0.0, 0.0, 36, 200, 28, 58)
 	_cam.add_child(_cam_rec)
-	_cam_title = UiTheme.label("", 24)
+	_cam_title = UiTheme.mono("", 24, UiTheme.TEXT)
 	_anchor(_cam_title, 0.0, 0.0, 36, 700, 62, 94)
 	_cam.add_child(_cam_title)
-	_cam_time = UiTheme.label("", 20)
+	_cam_time = UiTheme.mono("", 20, UiTheme.TEXT)
 	_cam_time.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_anchor(_cam_time, 1.0, 0.0, -460, -36, 28, 58)
 	_cam.add_child(_cam_time)
-	var hint := UiTheme.label("◄  ►  /  Q  D : changer de caméra        Échap : quitter les écrans", 16, UiTheme.DIM)
+	var hint := UiTheme.mono("◄ ►  /  Q D : changer de caméra        ÉCHAP : quitter les écrans", 15, UiTheme.DIM)
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_anchor(hint, 0.5, 1.0, -500, 500, -50, -24)
 	_cam.add_child(hint)

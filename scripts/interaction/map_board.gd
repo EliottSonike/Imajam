@@ -1,6 +1,6 @@
 class_name MapBoard
 extends Interactable
-## Carte murale du bureau. Pendant la panne, un voyant de secours la fait clignoter et on peut la prendre.
+## Carte murale du bureau. Pendant la panne, une lueur rouge clignotante l'éclaire et on peut la prendre.
 
 const MAP_TEXTURE := "res://assets/ui/plan_prison.png"
 
@@ -8,7 +8,6 @@ const MAP_TEXTURE := "res://assets/ui/plan_prison.png"
 
 var _quad: MeshInstance3D
 var _light: OmniLight3D
-var _bulb_mat: StandardMaterial3D
 var _blink := 0.0
 
 
@@ -48,21 +47,8 @@ func interact(_player: Player) -> void:
 	GameState.take_map()
 
 
-# petit voyant rouge au-dessus de la carte
+# lueur rouge de secours devant la carte (sans ampoule visible)
 func _build_emergency_light() -> void:
-	var bulb := MeshInstance3D.new()
-	var sphere := SphereMesh.new()
-	sphere.radius = 0.05
-	sphere.height = 0.1
-	bulb.mesh = sphere
-	bulb.position = Vector3(0, size.y / 2.0 + 0.18, 0.06)
-	_bulb_mat = StandardMaterial3D.new()
-	_bulb_mat.albedo_color = Color(0.35, 0.05, 0.05)
-	_bulb_mat.emission_enabled = true
-	_bulb_mat.emission = Color(1.0, 0.12, 0.08)
-	_bulb_mat.emission_energy_multiplier = 0.0
-	bulb.material_override = _bulb_mat
-	add_child(bulb)
 	_light = OmniLight3D.new()
 	_light.light_color = Color(1.0, 0.18, 0.12)
 	_light.omni_range = 2.4
@@ -74,12 +60,9 @@ func _build_emergency_light() -> void:
 func _on_power_changed(on: bool) -> void:
 	_light.visible = not on
 	set_process(not on)
-	if on:
-		_bulb_mat.emission_energy_multiplier = 0.0
 
 
 func _process(delta: float) -> void:
 	_blink += delta
 	var lit := fmod(_blink, 1.0) < 0.4
 	_light.light_energy = 0.7 if lit else 0.0
-	_bulb_mat.emission_energy_multiplier = 5.0 if lit else 0.2

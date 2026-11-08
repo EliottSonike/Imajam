@@ -20,7 +20,7 @@ func _ready() -> void:
 	UiTheme.centered(vb, Vector2(900, 560))
 	vb.add_theme_constant_override("separation", 18)
 	add_child(vb)
-	_title = UiTheme.label("", 56, UiTheme.ACCENT)
+	_title = UiTheme.title("", 64)
 	_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	vb.add_child(_title)
 	_subtitle = UiTheme.label("", 20, UiTheme.DIM)
@@ -45,7 +45,7 @@ func _ready() -> void:
 
 func open(ending: int = 0) -> void:
 	var data: Dictionary = Texts.ENDINGS.get(ending, {"title": "FIN", "subtitle": "", "body": ""})
-	_title.text = data["title"]
+	_title.text = String(data["title"]).to_upper()
 	_subtitle.text = data["subtitle"]
 	_body.text = data["body"]
 	_body.visible_ratio = 0.0
