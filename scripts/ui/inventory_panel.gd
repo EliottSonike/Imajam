@@ -11,18 +11,26 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	add_child(UiTheme.menu_bg())
 
-	var plate := PanelContainer.new()
-	UiTheme.centered(plate, Vector2(1080, 660))
-	add_child(plate)
+	var pocket := PanelContainer.new()
+	UiTheme.centered(pocket, Vector2(1080, 660))
+	pocket.add_theme_stylebox_override("panel", UiTheme.pocket())
+	add_child(pocket)
 	var root := VBoxContainer.new()
 	root.add_theme_constant_override("separation", 12)
-	plate.add_child(root)
+	pocket.add_child(root)
+	# bouton au milieu du bas du rabat (frère de la poche : un conteneur l'aurait étiré)
+	var bouton := UiTheme.pocket_button()
+	UiTheme.centered(bouton, Vector2(44, 44))
+	bouton.position.y -= 330 - 52
+	add_child(bouton)
 	var head := UiTheme.header("Effets personnels", "CASIER N° 07")
 	var close_btn := UiTheme.button("Fermer   [Tab]", 200)
 	close_btn.pressed.connect(close)
 	head.add_child(close_btn)
 	root.add_child(head)
-	root.add_child(HSeparator.new())
+	var under_flap := Control.new()
+	under_flap.custom_minimum_size.y = 34  # le contenu commence sous le rabat
+	root.add_child(under_flap)
 
 	var cols := HBoxContainer.new()
 	cols.add_theme_constant_override("separation", 28)
@@ -104,8 +112,8 @@ func _refresh() -> void:
 			box.bg_color = UiTheme.PAPER
 			box.border_color = Color(0.45, 0.38, 0.28)
 		else:
-			box.bg_color = Color(0.1, 0.11, 0.1, 0.8)
-			box.border_color = Color(UiTheme.DIM, 0.6)
+			box.bg_color = Color(0.03, 0.05, 0.09, 0.45)
+			box.border_color = Color(0.55, 0.6, 0.72, 0.3)
 		box.set_border_width_all(1)
 		box.content_margin_left = 14
 		box.content_margin_right = 14

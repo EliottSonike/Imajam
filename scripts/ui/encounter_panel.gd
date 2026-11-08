@@ -25,7 +25,7 @@ func _ready() -> void:
 	panel.offset_top = -270
 	panel.offset_bottom = -40
 	panel.grow_vertical = Control.GROW_DIRECTION_BEGIN
-	panel.add_theme_stylebox_override("panel", UiTheme.plate(true))
+	panel.add_theme_stylebox_override("panel", UiTheme.fabric(true))
 	add_child(panel)
 	var vb := VBoxContainer.new()
 	vb.add_theme_constant_override("separation", 12)

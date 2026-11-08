@@ -1,7 +1,8 @@
 class_name UiTheme
 extends RefCounted
-## Thème « poste de garde » : plaques d'acier vissées, boutons en ruban Dymo,
-## titres au pochoir, données en police à chasse fixe.
+## Thème « poste de garde » : toile d'uniforme surpiquée (poche pour l'inventaire,
+## porte-bloc pour la carte), boutons en ruban Dymo, titres au pochoir,
+## données en police à chasse fixe.
 ## Les textures sont générées par tools/generate_ui.py (assets/ui/theme/).
 
 const ACCENT := Color(0.95, 0.92, 0.82)  # titres (crème)
@@ -61,8 +62,8 @@ static func _build() -> Theme:
 	t.default_font = load(_FONT_TEXT)
 	t.default_font_size = 21
 
-	t.set_stylebox("panel", "PanelContainer", plate())
-	t.set_stylebox("panel", "Panel", plate())
+	t.set_stylebox("panel", "PanelContainer", fabric())
+	t.set_stylebox("panel", "Panel", fabric())
 
 	t.set_stylebox("normal", "Button", _tape("dymo.png"))
 	t.set_stylebox("hover", "Button", _tape("dymo_survol.png"))
@@ -134,17 +135,52 @@ static func _build() -> Theme:
 	return t
 
 
-## Plaque d'acier peinte et vissée (danger : cerclée de bandes jaunes et noires).
-static func plate(danger := false) -> StyleBoxTexture:
+## Toile d'uniforme bleu nuit, ourlée et surpiquée (alerte : fil rouge).
+static func fabric(alert := false) -> StyleBoxTexture:
+	return _tiled("toile_alerte.png" if alert else "toile.png", 28, 28, 40, 30)
+
+
+## Poche de chemise : le rabat occupe le haut (y poser l'en-tête), puis le fond de la poche.
+static func pocket() -> StyleBoxTexture:
+	var s := _tiled("poche.png", 28, 90, 44, 20)
+	s.content_margin_bottom = 34
+	return s
+
+
+## Bouton de la poche, à poser au milieu du bas du rabat.
+static func pocket_button() -> TextureRect:
+	var b := TextureRect.new()
+	b.texture = load(_DIR + "bouton.png")
+	b.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return b
+
+
+## Porte-bloc en isorel (la feuille posée dessus est le contenu).
+static func clipboard() -> StyleBoxTexture:
+	var s := _tiled("porte_bloc.png", 30, 30, 30, 66)
+	s.content_margin_bottom = 24
+	return s
+
+
+## Pince métallique du porte-bloc, à centrer en haut.
+static func clipboard_clip() -> TextureRect:
+	var c := TextureRect.new()
+	c.texture = load(_DIR + "pince.png")
+	c.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return c
+
+
+static func _tiled(file: String, margin: float, margin_top: float, pad: float, pad_top: float) -> StyleBoxTexture:
 	var s := StyleBoxTexture.new()
-	s.texture = load(_DIR + ("plaque_danger.png" if danger else "plaque.png"))
-	s.set_texture_margin_all(24.0 if danger else 32.0)
+	s.texture = load(_DIR + file)
+	s.set_texture_margin_all(margin)
+	s.texture_margin_top = margin_top
 	s.axis_stretch_horizontal = StyleBoxTexture.AXIS_STRETCH_MODE_TILE
 	s.axis_stretch_vertical = StyleBoxTexture.AXIS_STRETCH_MODE_TILE
-	s.content_margin_left = 40
-	s.content_margin_right = 40
-	s.content_margin_top = 30
-	s.content_margin_bottom = 30
+	s.content_margin_left = pad
+	s.content_margin_right = pad
+	s.content_margin_top = pad_top
+	s.content_margin_bottom = pad * 0.75
 	return s
 
 
@@ -243,7 +279,7 @@ static func centered(c: Control, size: Vector2) -> Control:
 	return c
 
 
-## Fond plein écran des menus : pénombre granuleuse, bord assombri.
+## Fond plein écran des menus : la scène derrière, floutée et assombrie.
 static func menu_bg() -> ColorRect:
 	var r := shader_rect(BACKDROP_FX)
 	r.mouse_filter = Control.MOUSE_FILTER_STOP
@@ -278,11 +314,21 @@ static func shader_rect(code: String) -> ColorRect:
 
 const BACKDROP_FX := """
 shader_type canvas_item;
-float rand(vec2 co) { return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453); }
+uniform sampler2D screen_tex : hint_screen_texture, filter_linear_mipmap;
 void fragment() {
-	float n = rand(floor(FRAGCOORD.xy * 0.5) + floor(TIME * 12.0));
-	float vig = smoothstep(1.05, 0.2, distance(UV, vec2(0.5, 0.45)));
-	vec3 c = vec3(0.045, 0.052, 0.046) + vec3(0.03, 0.034, 0.028) * vig + (n - 0.5) * 0.018;
+	vec2 px = 1.0 / vec2(textureSize(screen_tex, 0));
+	vec3 c = vec3(0.0);
+	float n = 0.0;
+	for (int i = -3; i <= 3; i++) {
+		for (int j = -3; j <= 3; j++) {
+			c += textureLod(screen_tex, SCREEN_UV + vec2(float(i), float(j)) * px * 5.0, 2.0).rgb;
+			n += 1.0;
+		}
+	}
+	c /= n;
+	float l = dot(c, vec3(0.299, 0.587, 0.114));
+	c = mix(vec3(l), c, 0.4) * 0.38 + vec3(0.012, 0.016, 0.026);
+	c *= mix(0.55, 1.0, smoothstep(1.0, 0.3, distance(UV, vec2(0.5))));
 	COLOR = vec4(c, 1.0);
 }
 """

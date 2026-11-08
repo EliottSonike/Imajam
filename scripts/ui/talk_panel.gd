@@ -27,7 +27,7 @@ func _ready() -> void:
 	panel.offset_top = -270
 	panel.offset_bottom = -12
 	panel.grow_vertical = Control.GROW_DIRECTION_BEGIN
-	var box := UiTheme.plate()
+	var box := UiTheme.fabric()
 	box.content_margin_top = 22
 	box.content_margin_bottom = 22
 	panel.add_theme_stylebox_override("panel", box)

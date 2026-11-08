@@ -1,6 +1,6 @@
 """Génère les textures de l'interface (thème « poste de garde »).
 
-Plaques d'acier peintes et vissées, boutons en ruban Dymo, bande de danger,
+Toile d'uniforme surpiquée, poche de chemise, porte-bloc, boutons en ruban Dymo,
 curseurs et interrupteurs. Toutes les images sont des 9-patch utilisées par
 scripts/ui/ui_theme.gd (StyleBoxTexture).
 
@@ -34,96 +34,159 @@ def tile_noise(seed, amp, blur=0.0, size=TILE):
     return img
 
 
-def painted_steel(w, h, seed=1):
-    fine = tile_noise(seed, 7)
-    mottle = tile_noise(seed + 1, 40, blur=6)
+NAVY = (31, 39, 57)
+FAB = 96  # tuile centrale des 9-patch de tissu (multiple des motifs : sergé 4 px, points 8 px)
+
+
+def twill(w, h, base, seed, amp=7):
+    """Sergé : fines côtes diagonales + grain du fil, raccordé tous les FAB pixels."""
+    grain = tile_noise(seed, 9, size=FAB // 2)
+    slub = tile_noise(seed + 1, 30, blur=3, size=FAB // 2)
     img = Image.new("RGB", (w, h))
     px = img.load()
-    fp, mp = fine.load(), mottle.load()
+    gp, sp = grain.load(), slub.load()
+    half = FAB // 2
     for y in range(h):
         for x in range(w):
-            n = (fp[x % TILE, y % TILE] - 128) + (mp[x % TILE, y % TILE] - 128) * 0.35
-            px[x, y] = tuple(max(0, min(255, int(c + n))) for c in PAINT)
+            rib = math.sin((x + y) * math.pi / 2.0) * amp * 0.6 + (amp * 0.5 if (x + y) % 4 == 0 else 0)
+            n = (gp[x % half, y % half] - 128) * 0.5 + (sp[x % half, y % half] - 128) * 0.12 + rib
+            px[x, y] = tuple(max(0, min(255, int(c + n))) for c in base)
     return img
 
 
-def screw(draw, cx, cy, r, rnd):
-    for i in range(r + 2, 0, -1):  # ombre portée
-        draw.ellipse((cx - i + 1, cy - i + 2, cx + i + 1, cy + i + 2), fill=(14, 16, 14))
-    for i in range(r, 0, -1):
-        t = i / r
-        v = int(150 - 70 * t)
-        draw.ellipse((cx - i - (1 - t), cy - i - (1 - t), cx + i - (1 - t), cy + i - (1 - t)), fill=(v, v + 2, v - 4))
-    a = rnd.uniform(0, math.pi)
-    dx, dy = math.cos(a) * (r - 1.5), math.sin(a) * (r - 1.5)
-    draw.line((cx - dx, cy - dy, cx + dx, cy + dy), fill=(30, 32, 30), width=2)
-    draw.line((cx - dx + 0.6, cy - dy + 1, cx + dx + 0.6, cy + dy + 1), fill=(150, 152, 145), width=1)
-
-
-def bevel(img, light, dark, outer=(9, 10, 9)):
+def stitches(img, inset, thread, dash=5, period=8, sides=(True, True, True, True), top=None, bottom=None):
+    """Surpiqûre : petits traits de fil clair avec leur ombre, à `inset` px du bord."""
     w, h = img.size
     d = ImageDraw.Draw(img)
-    d.rectangle((0, 0, w - 1, h - 1), outline=outer)
-    d.line((1, 1, w - 2, 1), fill=light)
-    d.line((1, 1, 1, h - 2), fill=light)
-    d.line((1, h - 2, w - 2, h - 2), fill=dark)
-    d.line((w - 2, 1, w - 2, h - 2), fill=dark)
-    d.line((2, h - 3, w - 3, h - 3), fill=tuple(int(c * 0.8) for c in PAINT))
-    d.line((w - 3, 2, w - 3, h - 3), fill=tuple(int(c * 0.8) for c in PAINT))
+    shadow = tuple(int(c * 0.45) for c in NAVY)
+    t = inset if top is None else top
+    b = h - 1 - inset if bottom is None else bottom
+    left, right = inset, w - 1 - inset
+    if sides[0]:
+        for x in range(left, right + 1):
+            if x % period < dash:
+                d.point((x, t + 1), fill=shadow)
+                d.point((x, t), fill=thread)
+    if sides[2]:
+        for x in range(left, right + 1):
+            if x % period < dash:
+                d.point((x, b + 1), fill=shadow)
+                d.point((x, b), fill=thread)
+    for x0, on in ((left, sides[3]), (right, sides[1])):
+        if not on:
+            continue
+        for y in range(t, b + 1):
+            if y % period < dash:
+                d.point((x0 + 1, y), fill=shadow)
+                d.point((x0, y), fill=thread)
 
 
-def chips(img, margin, seed):
-    """Éclats de peinture et rayures dans les coins (le métal apparaît)."""
-    rnd = random.Random(seed)
+def hem(img, depth=9):
+    """Ourlet : bord replié un peu plus sombre, pli éclairé côté intérieur."""
     w, h = img.size
-    d = ImageDraw.Draw(img)
-    for cx, cy in ((0, 0), (w, 0), (0, h), (w, h)):
-        for _ in range(16):
-            x = abs(cx - rnd.uniform(2, margin - 4))
-            y = abs(cy - rnd.uniform(2, margin - 4))
-            if 6 < min(x, w - x) and 6 < min(y, h - y) and rnd.random() < 0.6:
-                continue  # les éclats restent près du bord
-            r = rnd.uniform(0.4, 1.6)
-            v = rnd.randint(85, 125)
-            d.ellipse((x - r, y - r * 0.7, x + r, y + r * 0.7), fill=(v, v + 2, v - 6))
-        for _ in range(3):
-            x0, y0 = abs(cx - rnd.uniform(6, margin)), abs(cy - rnd.uniform(6, margin))
-            a = rnd.uniform(0, math.pi)
-            ln = rnd.uniform(3, 8)
-            d.line((x0, y0, x0 + math.cos(a) * ln, y0 + math.sin(a) * ln), fill=(78, 84, 76), width=1)
-
-
-def plate():
-    w = h = 32 * 2 + TILE
-    img = painted_steel(w, h, seed=3)
-    bevel(img, (88, 95, 86), (22, 25, 22))
-    chips(img, 32, seed=4)
-    d = ImageDraw.Draw(img)
-    rnd = random.Random(5)
-    for cx, cy in ((14, 14), (w - 15, 14), (14, h - 15), (w - 15, h - 15)):
-        screw(d, cx, cy, 5, rnd)
-    img.save(os.path.join(OUT, "plaque.png"))
-
-
-def hazard_plate():
-    m = 24
-    w = h = m * 2 + 48
-    img = painted_steel(w, h, seed=8)
     px = img.load()
     for y in range(h):
         for x in range(w):
-            edge = min(x, y, w - 1 - x, h - 1 - y)
-            if 3 <= edge < 15:
-                yellow = ((x + y) // 8) % 2 == 0
-                base = (216, 168, 34) if yellow else (22, 22, 20)
-                r, g, b = px[x, y]
-                n = (r - PAINT[0])
-                px[x, y] = tuple(max(0, min(255, c + n)) for c in base)
-    bevel(img, (110, 104, 70), (20, 20, 18))
+            e = min(x, y, w - 1 - x, h - 1 - y)
+            if e < depth:
+                k = 0.86 if e > 0 else 0.45
+                if e == depth - 1:
+                    k = 1.12
+                px[x, y] = tuple(int(min(255, c * k)) for c in px[x, y])
+            elif e == depth:
+                px[x, y] = tuple(int(c * 0.78) for c in px[x, y])
+
+
+def round_alpha(img, r):
+    mask = Image.new("L", img.size, 0)
+    ImageDraw.Draw(mask).rounded_rectangle((0, 0, img.size[0] - 1, img.size[1] - 1), r, fill=255)
+    out = img.convert("RGBA")
+    out.putalpha(mask)
+    return out
+
+
+def fabric(name, thread, seed):
+    m = 28
+    w = h = m * 2 + FAB
+    img = twill(w, h, NAVY, seed)
+    hem(img)
+    stitches(img, 13, thread)
+    stitches(img, 17, tuple(int(c * 0.85) for c in thread))
+    round_alpha(img, 5).save(os.path.join(OUT, name))
+
+
+def pocket():
+    """Poche de chemise d'uniforme : rabat en haut (le bouton est posé à part)."""
+    top, m = 76, 28
+    w, h = m * 2 + FAB, top + 14 + m + FAB  # marge haute du 9-patch = top + 14 (rabat + surpiqûres)
+    img = twill(w, h, NAVY, 21)
+    hem(img)
+    stitches(img, 13, (128, 138, 160), top=top + 4)
+    stitches(img, 17, (110, 118, 138), top=top + 8)
+    flap = twill(w, top - 6, tuple(int(c * 1.1) for c in NAVY), 22)
+    hem(flap, 7)
+    stitches(flap, 11, (140, 150, 172))
+    px = img.load()
+    for y in range(top - 6, top + 6):  # ombre portée du rabat
+        k = 0.4 + 0.6 * (y - (top - 6)) / 12.0
+        for x in range(w):
+            px[x, y] = tuple(int(c * k) for c in px[x, y])
+    img.paste(flap, (0, 0))
+    round_alpha(img, 6).save(os.path.join(OUT, "poche.png"))
+
+
+def button():
+    s = 44
+    img = Image.new("RGBA", (s, s), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
-    d.rectangle((15, 15, w - 16, h - 16), outline=(14, 15, 14))
-    chips(img, m, seed=9)
-    img.save(os.path.join(OUT, "plaque_danger.png"))
+    d.ellipse((5, 7, s - 3, s - 1), fill=(0, 0, 0, 110))
+    for i in range(18, 0, -1):
+        v = int(22 + (18 - i) * 1.6)
+        d.ellipse((s / 2 - 2 - i, s / 2 - 2 - i, s / 2 - 2 + i, s / 2 - 2 + i), fill=(v, v + 3, v + 8, 255))
+    d.ellipse((7, 7, s - 11, s - 11), outline=(70, 76, 88, 255), width=2)
+    for dx, dy in ((-4, -4), (4, -4), (-4, 4), (4, 4)):
+        cx, cy = s / 2 - 2 + dx, s / 2 - 2 + dy
+        d.ellipse((cx - 1.8, cy - 1.8, cx + 1.8, cy + 1.8), fill=(8, 9, 12, 255))
+    d.line((s / 2 - 6, s / 2 - 6, s / 2 + 2, s / 2 + 2), fill=(150, 156, 170, 255), width=1)  # fil
+    d.line((s / 2 + 2, s / 2 - 6, s / 2 - 6, s / 2 + 2), fill=(150, 156, 170, 255), width=1)
+    img.save(os.path.join(OUT, "bouton.png"))
+
+
+def clipboard():
+    """Porte-bloc en isorel : fibres, coins arrondis."""
+    m = 30
+    w = h = m * 2 + FAB
+    rnd = random.Random(31)
+    base = (118, 84, 52)
+    fib = tile_noise(31, 14, size=FAB // 2)
+    img = Image.new("RGB", (w, h))
+    px, fp = img.load(), fib.load()
+    half = FAB // 2
+    for y in range(h):
+        for x in range(w):
+            n = (fp[x % half, (y // 2) % half] - 128) * 0.6 + (fp[(x * 3) % half, y % half] - 128) * 0.25
+            px[x, y] = tuple(max(0, min(255, int(c + n))) for c in base)
+    d = ImageDraw.Draw(img)
+    d.rounded_rectangle((0, 0, w - 1, h - 1), 14, outline=(60, 40, 22), width=2)
+    d.rounded_rectangle((2, 2, w - 3, h - 3), 12, outline=(150, 112, 74), width=1)
+    round_alpha(img, 14).save(os.path.join(OUT, "porte_bloc.png"))
+
+
+def clip():
+    w, h = 220, 70
+    img = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    d.rounded_rectangle((14, 22, w - 10, h - 2), 8, fill=(0, 0, 0, 90))  # ombre
+    for y in range(18, h - 8):  # plaque de la pince
+        t = (y - 18) / (h - 26)
+        v = int(205 - 90 * t + 30 * math.exp(-((t - 0.2) / 0.1) ** 2))
+        d.line((8, y, w - 16, y), fill=(v, v, v + 4, 255))
+    d.rounded_rectangle((8, 18, w - 16, h - 8), 8, outline=(60, 62, 66, 255), width=2)
+    d.rectangle((30, 8, w - 38, 26), fill=(150, 152, 158, 255), outline=(55, 57, 60, 255), width=2)  # levier
+    d.line((34, 12, w - 42, 12), fill=(225, 226, 230, 255))
+    for x in (28, w - 36):  # rivets
+        d.ellipse((x - 5, h - 26, x + 5, h - 16), fill=(90, 92, 96, 255), outline=(40, 40, 44, 255))
+    img.save(os.path.join(OUT, "pince.png"))
 
 
 def dymo(name, base, seed):
@@ -208,8 +271,12 @@ def toggle(name, on):
 
 def main():
     os.makedirs(OUT, exist_ok=True)
-    plate()
-    hazard_plate()
+    fabric("toile.png", (128, 138, 160), 3)
+    fabric("toile_alerte.png", (196, 70, 58), 8)
+    pocket()
+    button()
+    clipboard()
+    clip()
     dymo("dymo.png", (22, 22, 22), 11)
     dymo("dymo_survol.png", (148, 30, 26), 12)
     dymo("dymo_appui.png", (110, 22, 20), 13)

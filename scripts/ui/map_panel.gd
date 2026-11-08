@@ -12,12 +12,15 @@ func _ready() -> void:
 
 	var panel := PanelContainer.new()
 	UiTheme.centered(panel, Vector2(960, 700))
+	panel.add_theme_stylebox_override("panel", UiTheme.clipboard())
 	add_child(panel)
+	var clip := UiTheme.clipboard_clip()
+	UiTheme.centered(clip, Vector2(220, 70))
+	clip.position.y -= 350 + 14
+	add_child(clip)
 	var vb := VBoxContainer.new()
 	vb.add_theme_constant_override("separation", 12)
 	panel.add_child(vb)
-	vb.add_child(UiTheme.header("Plan de la prison Saint-Roch", "RÉF. PL-07/12  ·  AILE PSY."))
-	vb.add_child(HSeparator.new())
 	var map := TextureRect.new()
 	map.texture = load(MapBoard.MAP_TEXTURE)
 	map.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
