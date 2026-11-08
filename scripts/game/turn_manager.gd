@@ -105,7 +105,8 @@ func _enter(p: Phase) -> void:
 			GameState.set_power(false)
 			await get_tree().create_timer(1.2).timeout
 			Dialogue.say(&"blackout")
-			_objective(&"blackout")
+			# carte déjà retenue (post-it) : pas besoin d'aller la chercher
+			_objective(&"blackout_carte" if GameState.has_map else &"blackout")
 			await get_tree().create_timer(3.0).timeout
 			if prisoner_3 and not prisoner_3.resolved and not GameState.power_on:
 				prisoner_3.start_stalking()
@@ -171,14 +172,14 @@ func _on_prisoner_2_spotted(where: StringName) -> void:
 	if where == &"route":
 		_say_p2_exit()
 	else:
-		Dialogue.say(&"turn_2_refectoire")
+		Dialogue.say_after(&"turn_2_refectoire")  # sans couper « il a forcé sa porte »
 		_objective(&"turn_2_refectoire")
 
 
 func _say_p2_exit() -> void:
 	if not _p2_exit_said:
 		_p2_exit_said = true
-		Dialogue.say(&"turn_2_sortie")
+		Dialogue.say_after(&"turn_2_sortie")  # sans couper « voyons la cellule 2 »
 
 
 func _on_prisoner_2_arrived() -> void:
@@ -208,7 +209,7 @@ func _on_prisoner_3_escaped(seen: bool) -> void:
 func _say_p3_exit() -> void:
 	if phase == Phase.TURN_3 and not _p3_exit_said:
 		_p3_exit_said = true
-		Dialogue.say(&"turn_3_sortie")
+		Dialogue.say_after(&"turn_3_sortie")
 
 
 func _on_prisoner_3_reached_generator() -> void:

@@ -11,8 +11,16 @@ var _voice: AudioStreamPlayer
 
 func stream(sound: String) -> AudioStream:
 	if not _cache.has(sound):
-		_cache[sound] = load(DIR + sound + ".wav")
+		_cache[sound] = null
+		for ext in ["ogg", "wav", "mp3"]:  # un .ogg enregistré remplace le .wav du même nom
+			if ResourceLoader.exists(DIR + sound + "." + ext):
+				_cache[sound] = load(DIR + sound + "." + ext)
+				break
 	return _cache[sound]
+
+
+func has_sound(sound: String) -> bool:
+	return stream(sound) != null
 
 
 ## Joue un son 2D une fois.

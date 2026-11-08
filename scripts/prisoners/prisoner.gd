@@ -83,8 +83,15 @@ func attack_player() -> void:
 	_moving = false
 	player.set_lock(&"encounter", true)
 	set_hidden_from_cameras(false)
+	face_instant(player.global_position)
+	player.face_point(global_position + Vector3.UP * 1.5, 0.35)
+	# la réplique (« Coucou, j'étais bien caché ? ») d'abord, puis le screamer : ils ne se chevauchent plus
 	if attack_line != &"":
-		Dialogue.say(attack_line)
+		_play(&"idle")
+		await Dialogue.say(attack_line)
+		await get_tree().create_timer(0.25).timeout
+		if resolved:
+			return
 	var to_me := global_position - player.global_position
 	to_me.y = 0.0
 	var target := player.global_position + to_me.normalized() * 0.95
@@ -92,7 +99,7 @@ func attack_player() -> void:
 	face_instant(player.global_position)
 	player.face_point(global_position + Vector3.UP * 1.5, 0.2)
 	_play(&"attaque", 1.0, 0.1)
-	Sfx.play("scream", -4.0, 1.25)
+	Sfx.play("screamer", -1.0)
 	var tw := create_tween()
 	tw.tween_property(self, "global_position", target, 0.3).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 	await tw.finished
@@ -117,6 +124,7 @@ func on_resolved(killed: bool) -> void:
 		Events.shake.emit(0.8)
 	else:
 		Sfx.play("taser")
+		Sfx.play_at("cri_taser" if Sfx.has_sound("cri_taser") else "scream", global_position + Vector3.UP * 1.5, 2.0, 6.0)
 		Events.flash.emit(Color(0.4, 0.6, 1.0, 0.6))
 		var shiver := create_tween()
 		for i in 10:

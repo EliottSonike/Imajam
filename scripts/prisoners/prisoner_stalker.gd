@@ -17,6 +17,11 @@ enum State { IDLE, WAITING, ESCAPING, STALKING, CHASING }
 @export var chase_speed := 3.4
 @export var catch_distance := 1.0
 @export var max_wait := 40.0
+## Temps passé à l'observer sur CAM 06 avant qu'il se lève et force sa porte.
+@export var watch_before_escape := 3.0
+## Couché dans son lit jusqu'à son tour (actes 0, 1 et 2) : position des pieds sur le matelas.
+@export var bed_feet := Vector3(16.24, 0.82, -12.05)  # matelas à ~0,66 m + épaisseur du dos
+@export var start_in_bed := true
 
 var state := State.IDLE
 var _repath := 0.0
@@ -27,6 +32,9 @@ var _breath: AudioStreamPlayer3D
 var _wait_left := 0.0
 var _spotted := false
 var _yeux: Array[Node3D] = []
+var _watched := 0.0
+var _in_bed := false
+var _stand := Transform3D()
 
 
 func _ready() -> void:
@@ -37,6 +45,29 @@ func _ready() -> void:
 	_build_eyes()
 	_set_eyes(not GameState.power_on)
 	Events.power_changed.connect(_on_power_changed)
+	if start_in_bed:
+		_lie_down()
+
+
+## Allongé sur le dos dans son lit, il respire (anim idle).
+func _lie_down() -> void:
+	_in_bed = true
+	_stand = global_transform
+	global_position = bed_feet
+	rotation = Vector3(0.0, PI, 0.0)  # tête vers l'oreiller (-Z)
+	_model.rotation.x = PI / 2.0
+
+
+## Il se redresse et descend du lit.
+func _get_up() -> void:
+	if not _in_bed:
+		return
+	_in_bed = false
+	var tw := create_tween().set_parallel()
+	tw.tween_property(_model, "rotation:x", 0.0, 0.7).set_trans(Tween.TRANS_SINE)
+	tw.tween_property(self, "global_position", _stand.origin, 0.9).set_trans(Tween.TRANS_SINE)
+	tw.tween_property(self, "rotation:y", _stand.basis.get_euler().y, 0.9)
+	await tw.finished
 
 
 func on_resolved(killed: bool) -> void:
@@ -50,9 +81,12 @@ func start_escape() -> void:
 		return
 	state = State.WAITING
 	_wait_left = max_wait
+	_watched = 0.0
 
 
 func _break_out(seen: bool) -> void:
+	state = State.IDLE  # le temps de sortir du lit
+	await _get_up()
 	_spotted = seen
 	if cell_door:
 		cell_door.open()
@@ -95,21 +129,35 @@ func debug_place_near(point: Vector3) -> void:
 	start_stalking()
 
 
-## Au retour du courant : il est juste devant le joueur.
+## Au retour du courant : il arrive dans le dos du joueur (juste son souffle), puis le joueur se retourne
+## d'un coup sur le screamer. Pas de réplique : le screamer marche mieux en silence.
 func screamer_at(player: Player) -> void:
 	stop_stalking()
 	_busy = true
+	_in_bed = false
+	_model.rotation = Vector3.ZERO
 	var forward := -player.camera.global_basis.z
 	forward.y = 0.0
 	forward = forward.normalized() if forward.length() > 0.01 else Vector3.FORWARD
-	global_position = player.global_position + forward * 1.1
+	# derrière lui, sans traverser un mur
+	var dist := 1.0
+	var from := player.global_position + Vector3.UP * 1.0
+	var query := PhysicsRayQueryParameters3D.create(from, from - forward * 1.3)
+	query.collision_mask = 1
+	var hit := get_world_3d().direct_space_state.intersect_ray(query)
+	if not hit.is_empty():
+		dist = clampf(from.distance_to(hit.position) - 0.35, 0.45, 1.0)
+	global_position = player.global_position - forward * dist
 	face_instant(player.global_position)
 	set_hidden_from_cameras(false)
-	_set_eyes(true)
-	_play(&"attaque", 1.3, 0.05)
+	_set_eyes(not GameState.power_on)  # lumière revenue : pas d'yeux rouges
+	_play(&"idle")
 	player.set_lock(&"encounter", true)
+	Sfx.play_at("breath", global_position + Vector3.UP * 1.6, -2.0, 2.0)  # un souffle dans le dos
+	await get_tree().create_timer(1.1).timeout
+	_play(&"attaque", 1.3, 0.05)
+	player.face_point(global_position + Vector3.UP * 1.5, 0.14)  # il se retourne d'un coup
 	Sfx.play("screamer", 2.0)
-	Dialogue.say(&"detenu_3_screamer")
 	Events.screamer.emit()
 	Events.flash.emit(Color(1.0, 1.0, 1.0, 0.9))
 	Events.shake.emit(1.4)
@@ -124,9 +172,11 @@ func _physics_process(delta: float) -> void:
 		State.WAITING:
 			_wait_left -= delta
 			if _update_seen(delta):
+				_watched += delta
+			if _watched >= watch_before_escape:
 				_break_out(true)
 			elif _wait_left <= 0.0:
-				_break_out(false)
+				_break_out(_watched > 0.0)
 		State.ESCAPING:
 			if not _spotted and _update_seen(delta):
 				_spotted = true

@@ -5,6 +5,10 @@ extends Node3D
 
 const MAT_MUR := preload("res://assets/materials/beton_mur.tres")
 const MAT_REFECTOIRE := preload("res://assets/materials/carrelage_refectoire.tres")
+const MAT_SOL_LINO := preload("res://assets/materials/sol_lino.tres")  # dalles vinyles (tools/generate_sol.py)
+const MAT_SOL_BETON := preload("res://assets/materials/sol_beton.tres")
+## Sols en béton brut ; les autres pièces ont des dalles vinyles, la douche du carrelage.
+const SOLS_BETON: Array[String] = ["Sol_Couloir", "Sol_Generateur", "Sol_Reserve", "Sol_Archives", "Sol_Buanderie"]
 const SHADER_ECRAN := preload("res://assets/materials/ecran_cctv.gdshader")
 const ECRAN := preload("res://models/ecran.glb")
 const TELEPHONE := preload("res://models/telephone.glb")
@@ -24,6 +28,7 @@ const HEURE_DEPART := 2 * 3600 + 47 * 60 + 13  # 02:47:13
 @export var prison: Node3D
 
 var _ecrans: Array[ShaderMaterial] = []
+var _sols := {}
 var _flux: Array[Dictionary] = []
 var _cams: Array[SecurityCamera] = []
 var _temps := 0.0
@@ -39,6 +44,9 @@ func _ready() -> void:
 		mobilier.name = "Mobilier"
 		mobilier.prison = prison
 		add_child(mobilier)
+		var traces := TracesEau.new()
+		traces.name = "TracesEau"
+		add_child(traces)
 	_poser_bureau()
 	Events.power_changed.connect(_on_power_changed)
 	Events.camera_mode_changed.connect(_on_camera_mode_changed)
@@ -62,6 +70,26 @@ func _habiller(root: Node) -> void:
 					mi.set_surface_override_material(i, MAT_MUR)
 				"Sol_Refectoire":
 					mi.set_surface_override_material(i, MAT_REFECTOIRE)
+				var n when n.begins_with("Sol_"):
+					mi.set_surface_override_material(i, _sol(mat))
+
+
+## Matériau texturé d'un sol, teinté avec la couleur d'origine de la pièce (un peu adoucie).
+func _sol(original: Material) -> Material:
+	var nom := original.resource_name
+	if not _sols.has(nom):
+		var base: StandardMaterial3D = MAT_SOL_BETON if nom in SOLS_BETON else MAT_SOL_LINO
+		if nom == "Sol_Douches":
+			base = MAT_REFECTOIRE
+		var m := base.duplicate() as StandardMaterial3D
+		var c := Color(0.75, 0.75, 0.75)
+		if original is BaseMaterial3D:
+			c = (original as BaseMaterial3D).albedo_color
+		var gris := (c.r + c.g + c.b) / 3.0
+		c = c.lerp(Color(gris, gris, gris), 0.35 if base == MAT_SOL_LINO else 0.7)
+		m.albedo_color = c * (1.15 if base == MAT_SOL_LINO else 1.0)
+		_sols[nom] = m
+	return _sols[nom]
 
 
 func _poser_bureau() -> void:

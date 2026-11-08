@@ -18,12 +18,26 @@ const TABLEAU := preload("res://models/tableau_electrique.glb")
 const GROUPE := preload("res://models/groupe_electrogene.glb")
 const ETAGERE := preload("res://models/etagere.glb")
 const CAMERA := preload("res://models/camera_surveillance.glb")
+const ELECTROMENAGER := preload("res://models/electromenager.glb")  # frigo, gazinière, machine à laver
+const TABLE_BOIS := preload("res://models/table_ancienne.glb")
+const JERRICAN := preload("res://models/jerrican.glb")
+const CUISINE := preload("res://models/cuisine_meubles.glb")  # meubles en L, nord + est, comme la cuisine
+const POMMEAU := preload("res://models/pommeau_douche.glb")
+const CHARIOT := preload("res://models/chariot_menage.glb")  # « Cleaning Cart », Kerridge1, CC-BY-NC 4.0
+const CHARIOT_SOINS := preload("res://models/chariot_infirmerie.glb")
+const CHARIOT_LINGE := preload("res://models/chariot_linge.glb")
+const BUREAU := preload("res://models/bureau.glb")
+const TABLE_INOX := preload("res://models/table_inox.glb")
+const PANNEAU_MOUILLE := preload("res://models/panneau_sol_mouille.glb")
 
 const CACHES: Array[String] = ["Lit_Cellule", "Matelas_Cellule", "Lits_Infirmerie", "Matelas_Infirmerie",
 	"Tables_Refectoire", "Bancs_Refectoire", "Casiers_Vestiaire", "Armoire_Bureau", "Armoire_Medicaments_Infirmerie",
 	"Tabouret_Cellule", "Tabourets_Parloir", "Chaise_Bureau", "Cartons_Archives", "Caisses_Reserve",
 	"Toilettes_Cellule", "Lavabo_Cellule", "Tableau_Electrique_Generateur", "Groupe_Electrogene_Generateur",
-	"Etageres_Archives", "Etageres_Reserve"]
+	"Etageres_Archives", "Etageres_Reserve", "Frigo_Cuisine", "Machines_a_Laver_Buanderie",
+	"Table_Cellule", "Table_Archives", "Table_Pliage_Buanderie",
+	"Bidons_Generateur", "Plan_de_Travail_Cuisine", "Fourneau_Cuisine", "Pommeaux_Douches",
+	"Chariot_Infirmerie", "Chariot_Linge_Buanderie", "Poste_Securite_Bureau", "Ilot_Cuisine"]
 
 # Réglage d'un modèle (« fit ») :
 #   len / height / width : taille voulue en X (longueur) / Y / Z, à l'échelle uniforme sauf si plusieurs sont donnés
@@ -59,14 +73,23 @@ const CARTONS := [
 	[Vector3(8.2, 0, 15.0), -5.0, Vector3(0.6, 1.0, 0.6)],  # deux cartons empilés
 	[Vector3(10.05, 0, 13.95), 14.0, Vector3(0.5, 0.5, 0.5)],
 ]
-## [centre, rotation] — toilettes : le modèle est couché, « pre » le relève, il regarde alors vers +X.
+## [centre, rotation] — toilettes : le modèle est couché, « pre » le relève (−90° en X), il regarde alors vers +X.
 const TOILETTES_POS := [[Vector3(6.06, 0, 1.84), -90.0], [Vector3(48.57, 0, 21.46), 180.0], [Vector3(17.26, 0, 14.43), -90.0]]
 const LAVABOS := [[Vector3(6.76, 0, 1.72), 0.0], [Vector3(48.68, 0, 22.16), -90.0], [Vector3(17.96, 0, 14.32), 0.0]]
 ## Étagères : [centre, rotation (face ouverte vers la pièce), longueur du mur]
 const ETAGERES := [
 	[Vector3(7.35, 0, 14.85), 90.0, 3.3], [Vector3(10.84, 0, 14.85), -90.0, 3.3], [Vector3(9.1, 0, 16.44), 180.0, 2.6],  # réserve
-	[Vector3(7.94, 0, 20.3), 90.0, 3.98], [Vector3(10.84, 0, 20.3), -90.0, 3.98], [Vector3(9.39, 0, 22.04), 180.0, 2.41],  # archives
+	[Vector3(9.39, 0, 18.55), 0.0, 3.39], [Vector3(9.39, 0, 22.05), 180.0, 3.39], [Vector3(10.85, 0, 20.3), -90.0, 3.0],  # archives (porte à l'ouest)
 ]
+## Petites tables en bois : [centre, rotation, longueur, largeur, hauteur] (hauteur d'origine : les journaux sont posés dessus).
+const TABLES_BOIS := [
+	[Vector3(5.96, 0, 3.51), 90.0, 1.0, 0.5, 0.77],  # cellule 1
+	[Vector3(46.9, 0, 21.36), 0.0, 1.0, 0.5, 0.77],  # cellule 2
+	[Vector3(17.16, 0, 16.1), 90.0, 1.0, 0.5, 0.77],  # cellule 3
+	[Vector3(9.1, 0, 20.3), 0.0, 1.2, 0.8, 0.75],  # archives
+	[Vector3(38.0, 0, 11.65), 0.0, 2.2, 0.69, 0.85],  # buanderie (table de pliage)
+]
+const CHARIOT_ROT := 0.0
 const CASIER_HAUTEUR := 1.9
 const CASIER_COUPE := 57.0  # casier.glb : bloc de trois à gauche de cette abscisse, casier seul à droite
 const ETAGERE_LARGEUR := 2.18
@@ -101,10 +124,10 @@ func _ready() -> void:
 		else:
 			_poser(CARTON.instantiate(), c[0], c[1], {"box": size})
 	for t in TOILETTES_POS:
-		_poser(TOILETTES.instantiate(), t[0], t[1], {"pre": Vector3(90, 0, 0), "height": 0.78})
+		_poser(TOILETTES.instantiate(), t[0], t[1], {"pre": Vector3(-90, 0, 0), "height": 0.78})
 	for l in LAVABOS:
 		_poser(LAVABO.instantiate(), l[0], l[1], {"height": 0.9})
-	_poser(TABLEAU.instantiate(), Vector3(48.66, 0, 3.2), -90.0, {"len": 1.0, "y": 0.62})
+	_poser(TABLEAU.instantiate(), Vector3(48.75, 0, 3.2), -90.0, {"len": 0.6, "y": 0.92})  # 60 cm de large, centré à 1,4 m
 	_poser(GROUPE.instantiate(), Vector3(46.2, 0, 1.4), -90.0, {"foot": Vector2(1.6, 3.4)})  # empreinte dans le repère du modèle (long en Z)
 	for e in ETAGERES:
 		var n := maxi(1, roundi(float(e[2]) / ETAGERE_LARGEUR))
@@ -115,6 +138,40 @@ func _ready() -> void:
 			shelf.position.x = -float(e[2]) / 2.0 + w * (i + 0.5)
 			rangee.add_child(shelf)
 		_placer(rangee, e[0], e[1])
+	for t in TABLES_BOIS:
+		_poser(TABLE_BOIS.instantiate(), t[0], t[1], {"len": t[2], "width": t[3], "height": t[4]})
+	_poser(JERRICAN.instantiate(), Vector3(43.85, 0, 5.05), 12.0, {"height": 0.47})
+	_poser(JERRICAN.instantiate(), Vector3(44.45, 0, 5.1), -20.0, {"height": 0.47})
+	# meubles de cuisine : étirés sur l'emprise des plans de travail d'origine (5,38 × 4,54 m)
+	_poser(CUISINE.instantiate(), Vector3(32.2, 0, 3.78), 0.0, {"len": 5.38, "width": 4.54, "height": 2.46})
+	for z in [21.75, 23.1, 24.45]:  # pommeaux de douche, bras vers +X (mur ouest)
+		_poser(POMMEAU.instantiate(), Vector3(18.44, 0, z), 90.0, {"height": 0.16, "y": 1.94})
+	# chariot de ménage abandonné au bout du couloir sud-est (la dernière page du carnet y est cachée,
+	# des traces d'eau y mènent depuis la buanderie : voir TracesEau)
+	_poser(CHARIOT.instantiate(), Vector3(48.2, 0, 30.1), CHARIOT_ROT, {"height": 1.25})
+	# buanderie : cartons de linge et tabouret
+	_poser(CARTON.instantiate(), Vector3(40.2, 0, 14.95), 6.0, {"box": Vector3(0.55, 0.42, 0.45)})
+	_poser(CARTON.instantiate(), Vector3(40.2, 0, 14.95), -4.0, {"box": Vector3(0.5, 0.38, 0.42), "y": 0.42})
+	_poser(CARTON.instantiate(), Vector3(39.55, 0, 15.0), 20.0, {"box": Vector3(0.45, 0.35, 0.4)})
+	_poser(TABOURET.instantiate(), Vector3(38.7, 0, 12.7), 17.0, {"height": 0.46})
+	# infirmerie : chariot de soins (les médicaments sont posés dessus, à 0,90 m)
+	_poser(CHARIOT_SOINS.instantiate(), Vector3(29.0, 0, 13.15), 0.0, {"len": 0.6, "height": 0.95, "width": 0.5})
+	# buanderie : bac à linge sale
+	_poser(CHARIOT_LINGE.instantiate(), Vector3(37.4, 0, 14.8), 0.0, {"len": 0.9})
+	# poste de garde : deux bureaux côte à côte sous les écrans (plateau à 0,76 m comme l'ancien)
+	for x in [3.15, 5.25]:
+		_poser(BUREAU.instantiate(), Vector3(x, 0, 30.24), 0.0, {"len": 2.1, "height": 0.76, "width": 0.89})
+	# cuisine : table de préparation en inox à la place de l'îlot
+	_poser(TABLE_INOX.instantiate(), Vector3(32.3, 0, 4.4), 0.0, {"len": 1.6, "height": 0.9, "width": 1.0})
+	# panneaux « sol mouillé » : à la sortie de la buanderie, et un renversé près du chariot abandonné
+	_poser(PANNEAU_MOUILLE.instantiate(), Vector3(36.75, 0, 12.6), -70.0, {"height": 0.62})
+	var tombe := _caler(PANNEAU_MOUILLE.instantiate(), {"pre": Vector3(-90, 0, 0), "height": 0.12})
+	_placer(tombe, Vector3(46.9, 0, 29.75), 35.0)
+	# électroménager années 50 (façade en +Z)
+	_poser(_sous_arbre(ELECTROMENAGER, "frigo"), Vector3(34.52, 0, 6.5), -90.0, {"height": 1.9})
+	var lave := _sous_arbre(ELECTROMENAGER, "machine_laver")
+	for z in [11.84, 12.52, 13.2]:
+		_poser(lave.duplicate(), Vector3(40.17, 0, z), -90.0, {"height": 0.85})
 	_cameras.call_deferred()
 
 
@@ -181,6 +238,24 @@ func _boite(n: Node3D) -> AABB:
 		box = b if first else box.merge(b)
 		first = false
 	return box
+
+
+## Copie d'une partie nommée d'un modèle (avec sa position dans le modèle).
+func _sous_arbre(scene: PackedScene, nom: String) -> Node3D:
+	var src := scene.instantiate() as Node3D
+	var part := src.find_child(nom, true, false) as Node3D
+	var out := Node3D.new()
+	if part:
+		var t := Transform3D.IDENTITY
+		var p: Node = part
+		while p != src and p != null:
+			t = (p as Node3D).transform * t
+			p = p.get_parent()
+		var copy := part.duplicate() as Node3D
+		copy.transform = t
+		out.add_child(copy)
+	src.free()
+	return out
 
 
 # --- Casiers -------------------------------------------------------------------

@@ -15,9 +15,17 @@ enum State { IDLE, WAITING, ESCAPING, REFECTOIRE, TALKING, CALM }
 @export var run_speed := 3.0
 @export var talk_distance := 5.0
 @export var max_wait := 40.0
+## Temps pendant lequel le joueur doit l'avoir vu sur CAM 09 avant qu'il force sa porte
+## (sinon il s'évade à l'instant même où l'écran s'allume, en plein milieu de la réplique).
+@export var watch_before_escape := 3.0
+## Actes 0 et 1 : recroquevillé dans un coin de sa cellule, bien visible sur CAM 09.
+@export var curl_position := Vector3(44.2, 0.0, -4.5)
+@export var curl_yaw := PI / 2.0
 
 var state := State.IDLE
 var _wait_left := 0.0
+var _watched := 0.0
+var _curled := true
 var _leg := 0
 var _spotted_route := false
 var _spotted_refectoire := false
@@ -29,6 +37,8 @@ var _twitch_target := 0.0
 
 func _ready() -> void:
 	super._ready()
+	global_position = curl_position
+	rotation.y = curl_yaw
 	_build_knife()
 	Events.talk_finished.connect(_on_talk_finished)
 
@@ -38,6 +48,8 @@ func start_escape() -> void:
 		return
 	state = State.WAITING
 	_wait_left = max_wait
+	_watched = 0.0
+	_curled = false
 
 
 func on_talk_answer(effect: int) -> void:
@@ -51,9 +63,11 @@ func _physics_process(delta: float) -> void:
 		State.WAITING:
 			_wait_left -= delta
 			if _update_seen(delta):
+				_watched += delta
+			if _watched >= watch_before_escape:
 				_break_out(true)
 			elif _wait_left <= 0.0:
-				_break_out(false)
+				_break_out(_watched > 0.0)
 		State.ESCAPING:
 			if _follow_path(delta, run_speed):
 				if _leg == 0:
@@ -128,6 +142,8 @@ func _on_talk_finished(id: int, success: bool) -> void:
 
 func _process(delta: float) -> void:
 	_pose = &"agite" if state in [State.WAITING, State.REFECTOIRE, State.TALKING] else &""
+	if _curled and state == State.IDLE:
+		_pose = &"assis_boucle"
 	super._process(delta)
 	if resolved or _busy or _model == null or state == State.IDLE:
 		return

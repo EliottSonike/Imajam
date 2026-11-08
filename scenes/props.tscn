@@ -59,6 +59,6 @@ script = ExtResource("6_journal")
 index = 2
 
 [node name="Journal4_cache" type="StaticBody3D" parent="." unique_id=1686231970]
-transform = Transform3D(0.939693, 0, 0.34202, 0, 1, 0, -0.34202, 0, 0.939693, 5.2, 0.005, -7.2)
+transform = Transform3D(0.939693, 0, 0.34202, 0, 1, 0, -0.34202, 0, 0.939693, 44.2, 0.005, 2.3)
 script = ExtResource("6_journal")
 index = 3

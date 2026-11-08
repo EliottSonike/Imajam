@@ -35,8 +35,21 @@ func _ready() -> void:
 	_step_player.volume_db = -12.0
 	add_child(_step_player)
 	Events.shake.connect(func(s: float) -> void: _shake = maxf(_shake, s))
+	Events.vision_changed.connect(_on_vision_changed)
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	make_view_current()
+
+
+## Vision trouble : il halète (boucle « halete ») jusqu'à ce qu'il prenne ses médicaments.
+func _on_vision_changed(impaired: bool) -> void:
+	if impaired:
+		Sfx.loop("halete", -10.0)
+	else:
+		Sfx.stop_loop("halete")
+
+
+func _exit_tree() -> void:
+	Sfx.stop_loop("halete")  # retour au menu, rechargement : la boucle ne doit pas continuer
 
 
 func _input(event: InputEvent) -> void:
@@ -72,7 +85,8 @@ func _physics_process(delta: float) -> void:
 		# regard au clavier (flèches)
 		rotate_y(Input.get_axis(&"turn_right", &"turn_left") * keyboard_turn_speed * delta)
 		head.rotation.x = clampf(head.rotation.x + Input.get_axis(&"look_down", &"look_up") * keyboard_turn_speed * 0.6 * delta, deg_to_rad(-85.0), deg_to_rad(85.0))
-	is_sprinting = Input.is_action_pressed(&"sprint") and input_dir != Vector2.ZERO
+	# vision trouble : plus de course (il halète, voir _on_vision_changed)
+	is_sprinting = Input.is_action_pressed(&"sprint") and input_dir != Vector2.ZERO and not GameState.vision_impaired
 	var speed := sprint_speed if is_sprinting else walk_speed
 	if GameState.vision_impaired:
 		speed *= 0.8

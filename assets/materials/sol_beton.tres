@@ -1,0 +1,16 @@
+[gd_resource type="StandardMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/textures/beton_mur/beton_couleur.jpg" id="1_coul"]
+[ext_resource type="Texture2D" path="res://assets/textures/beton_mur/beton_normal.png" id="2_norm"]
+[ext_resource type="Texture2D" path="res://assets/textures/beton_mur/beton_rugosite.jpg" id="3_rug"]
+
+[resource]
+resource_name = "Sol_beton"
+albedo_texture = ExtResource("1_coul")
+roughness_texture = ExtResource("3_rug")
+roughness_texture_channel = 4
+normal_enabled = true
+normal_texture = ExtResource("2_norm")
+uv1_scale = Vector3(0.28, 0.28, 0.28)
+uv1_triplanar = true
+uv1_world_triplanar = true
