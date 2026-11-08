@@ -269,6 +269,75 @@ def toggle(name, on):
     img.save(os.path.join(OUT, name))
 
 
+def _icon_canvas():
+    s = 128
+    return Image.new("RGBA", (s * 2, s * 2), (0, 0, 0, 0)), 2  # dessiné en 2x puis réduit (anticrénelage)
+
+
+def _finish_icon(img, name):
+    img = img.resize((128, 128), Image.LANCZOS)
+    shadow = Image.new("RGBA", img.size, (0, 0, 0, 0))
+    a = img.split()[3].point(lambda v: int(v * 0.55))
+    shadow.putalpha(a.filter(ImageFilter.GaussianBlur(2.5)))
+    out = Image.new("RGBA", img.size, (0, 0, 0, 0))
+    out.alpha_composite(shadow, (3, 4))
+    out.alpha_composite(img)
+    out.save(os.path.join(OUT, name))
+
+
+def icon_gun():
+    img, k = _icon_canvas()
+    d = ImageDraw.Draw(img)
+    S = lambda pts: [(x * k, y * k) for x, y in pts]
+    ink = (12, 13, 15, 255)
+    d.polygon(S([(70, 56), (98, 56), (108, 108), (104, 112), (84, 114), (80, 110)]), fill=(40, 34, 30, 255), outline=ink, width=4)  # crosse
+    for i in range(5):
+        y = 70 + i * 8
+        d.line(S([(80 + i * 1.5, y), (100 + i * 1.6, y - 2)]), fill=(64, 56, 48, 255), width=3)
+    d.arc([60 * k, 46 * k, 84 * k, 78 * k], 0, 180, fill=ink, width=7)  # pontet
+    d.line(S([(70, 56), (66, 68)]), fill=ink, width=7)  # détente
+    d.rounded_rectangle(S([(10, 32), (110, 56)]), 4 * k, fill=(70, 74, 80, 255), outline=ink, width=4)  # culasse
+    d.rectangle(S([(10, 52), (64, 60)]), fill=(52, 55, 60, 255), outline=ink, width=3)  # carcasse
+    for i in range(6):
+        x = 88 + i * 3.5
+        d.line(S([(x, 35), (x, 53)]), fill=(48, 50, 55, 255), width=3)  # stries
+    d.line(S([(14, 37), (104, 37)]), fill=(140, 146, 154, 255), width=3)  # reflet
+    d.rectangle(S([(10, 28), (16, 32)]), fill=ink)  # guidon
+    _finish_icon(img, "objet_pistolet.png")
+
+
+def icon_taser():
+    img, k = _icon_canvas()
+    d = ImageDraw.Draw(img)
+    S = lambda pts: [(x * k, y * k) for x, y in pts]
+    ink = (12, 13, 15, 255)
+    yel, yel_d = (236, 190, 36, 255), (190, 146, 20, 255)
+    d.polygon(S([(42, 66), (66, 66), (72, 112), (46, 114)]), fill=yel_d, outline=ink, width=4)  # poignée
+    for i in range(4):
+        d.line(S([(48, 76 + i * 9), (68, 75 + i * 9)]), fill=(30, 28, 20, 255), width=4)
+    d.rounded_rectangle(S([(14, 40), (96, 70)]), 8 * k, fill=yel, outline=ink, width=4)  # corps
+    d.line(S([(22, 46), (88, 46)]), fill=(255, 236, 150, 255), width=3)
+    d.rounded_rectangle(S([(90, 36), (118, 74)]), 5 * k, fill=(28, 30, 34, 255), outline=ink, width=4)  # tête
+    for y in (46, 62):
+        d.rectangle(S([(116, y), (122, y + 5)]), fill=(90, 170, 255, 255), outline=ink, width=2)  # électrodes
+    d.line(S([(60, 70), (56, 82)]), fill=ink, width=6)  # détente
+    _finish_icon(img, "objet_taser.png")
+
+
+def icon_meds():
+    img, k = _icon_canvas()
+    d = ImageDraw.Draw(img)
+    S = lambda pts: [(x * k, y * k) for x, y in pts]
+    ink = (20, 22, 26, 255)
+    d.polygon(S([(18, 48), (82, 38), (112, 52), (48, 64)]), fill=(250, 250, 246, 255), outline=ink, width=4)  # dessus
+    d.polygon(S([(18, 48), (48, 64), (48, 106), (18, 88)]), fill=(206, 208, 206, 255), outline=ink, width=4)  # côté
+    d.polygon(S([(48, 64), (112, 52), (112, 92), (48, 106)]), fill=(232, 233, 230, 255), outline=ink, width=4)  # face
+    red = (206, 30, 30, 255)
+    d.polygon(S([(74, 66), (86, 64), (86, 72), (94, 70), (94, 80), (86, 82), (86, 90), (74, 92), (74, 84), (66, 86), (66, 76), (74, 74)]), fill=red)
+    d.polygon(S([(56, 46), (64, 44), (72, 47), (64, 49)]), fill=red)
+    _finish_icon(img, "objet_medicaments.png")
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
     fabric("toile.png", (128, 138, 160), 3)
@@ -287,6 +356,9 @@ def main():
     fader("curseur_survol.png", (240, 170, 50))
     toggle("interrupteur_on.png", True)
     toggle("interrupteur_off.png", False)
+    icon_gun()
+    icon_taser()
+    icon_meds()
     print("textures écrites dans", OUT)
 
 
