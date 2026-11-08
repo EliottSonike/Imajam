@@ -19,5 +19,6 @@ func _player():
 	return get_tree().get_first_node_in_group("player")
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed and event.keycode == KEY_F1:
-		open("Texte de test du journal.")  # debug, à enlever
+	if event is InputEventKey and event.pressed and event.keycode == KEY_P:
+		print("P appuyé")
+		Sfx.play("screamer", 2.0)
