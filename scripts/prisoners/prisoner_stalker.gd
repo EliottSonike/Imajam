@@ -105,7 +105,7 @@ func screamer_at(player: Player) -> void:
 	face_instant(player.global_position)
 	set_hidden_from_cameras(false)
 	player.set_lock(&"encounter", true)
-	Sfx.play("scream", 2.0)
+	Sfx.play("screamer", 2.0)
 	Dialogue.say(&"detenu_3_screamer")
 	Events.screamer.emit()
 	Events.flash.emit(Color(1.0, 1.0, 1.0, 0.9))
