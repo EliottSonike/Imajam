@@ -15,9 +15,19 @@ const BUREAU_Y := 0.76
 const CHAISE := Vector3(-0.05, 0.0, 1.37)
 const TELEPHONE_POS := Vector3(1.9, 0.76, 1.93)
 
+## Flux en direct : chaque écran filme une caméra de surveillance via une SubViewport.
+const FLUX_RES := Vector2i(384, 234)  # même rapport que la dalle de l'écran
+const FLUX_DUREE := Vector2(7.0, 12.0)  # temps passé sur une caméra avant de changer
+const FLUX_DISTANCE_MAX := 9.0  # au-delà, le joueur ne voit plus les écrans : on coupe le rendu
+const HEURE_DEPART := 2 * 3600 + 47 * 60 + 13  # 02:47:13
+
 @export var prison: Node3D
 
 var _ecrans: Array[ShaderMaterial] = []
+var _flux: Array[Dictionary] = []
+var _cams: Array[SecurityCamera] = []
+var _temps := 0.0
+var _mode_cameras := false
 
 
 func _ready() -> void:
@@ -27,6 +37,8 @@ func _ready() -> void:
 		_habiller(prison)
 	_poser_bureau()
 	Events.power_changed.connect(_on_power_changed)
+	Events.camera_mode_changed.connect(_on_camera_mode_changed)
+	_brancher_flux.call_deferred()
 
 
 func _habiller(root: Node) -> void:
@@ -79,3 +91,125 @@ func _vers_chaise(from: Vector3) -> float:
 func _on_power_changed(on: bool) -> void:
 	for mat in _ecrans:
 		mat.set_shader_parameter(&"allume", 1.0 if on else 0.0)
+	_maj_rendu()
+
+
+func _on_camera_mode_changed(active: bool) -> void:
+	_mode_cameras = active
+	_maj_rendu()
+
+
+# --- Flux en direct ---------------------------------------------------------
+
+func _brancher_flux() -> void:
+	for n in get_tree().get_nodes_in_group(&"security_cameras"):
+		_cams.append(n as SecurityCamera)
+	if _cams.is_empty():
+		return  # pas de caméras (menu) : les écrans gardent leur neige
+	for i in _ecrans.size():
+		var vp := SubViewport.new()
+		vp.name = "Flux%d" % (i + 1)
+		vp.size = FLUX_RES
+		vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+		add_child(vp)
+		var cam := Camera3D.new()
+		cam.current = true
+		vp.add_child(cam)
+
+		var nom := _texte(14, Color(0.9, 0.95, 0.9))
+		nom.position = Vector2(12, 8)
+		vp.add_child(nom)
+		var heure := _texte(12, Color(0.75, 0.8, 0.75))
+		heure.position = Vector2(12, FLUX_RES.y - 24)
+		vp.add_child(heure)
+
+		var mat := _ecrans[i]
+		mat.set_shader_parameter(&"flux", vp.get_texture())
+		mat.set_shader_parameter(&"a_flux", 1.0)
+		var flux := {"vp": vp, "cam": cam, "nom": nom, "heure": heure, "mat": mat,
+			"source": null, "reste": randf_range(FLUX_DUREE.x, FLUX_DUREE.y) + i * 1.5,
+			"parasites": 0.0}
+		_flux.append(flux)
+		_regler(flux, _cams[(_ecrans.size() - 1 - i) % _cams.size()])  # de gauche à droite : CAM 01, 02, 03…
+	_maj_rendu()
+
+
+func _texte(taille: int, couleur: Color) -> Label:
+	var l := Label.new()
+	l.add_theme_font_override("font", UiTheme.font())
+	l.add_theme_font_size_override("font_size", taille)
+	l.add_theme_color_override("font_color", couleur)
+	l.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.85))
+	l.add_theme_constant_override("shadow_offset_x", 1)
+	l.add_theme_constant_override("shadow_offset_y", 1)
+	return l
+
+
+func _regler(flux: Dictionary, source: SecurityCamera) -> void:
+	flux.source = source
+	var cam := flux.cam as Camera3D
+	cam.global_transform = source.global_transform
+	cam.fov = source.fov
+	cam.near = source.near
+	cam.far = source.far
+	cam.cull_mask = source.cull_mask
+	cam.environment = source.environment
+	(flux.nom as Label).text = "CAM %02d · %s" % [_numero(source), source.label.to_upper()]
+
+
+func _numero(source: SecurityCamera) -> int:
+	var morceaux := String(source.name).split("_")
+	if morceaux.size() > 1 and morceaux[1].is_valid_int():
+		return morceaux[1].to_int()
+	return _cams.find(source) + 1
+
+
+## Caméra suivante qui n'est pas déjà sur un autre écran.
+func _suivante(flux: Dictionary) -> SecurityCamera:
+	var prises: Array = []
+	for f in _flux:
+		prises.append(f.source)
+	var i := _cams.find(flux.source)
+	for k in _cams.size():
+		var c := _cams[(i + 1 + k) % _cams.size()]
+		if not prises.has(c):
+			return c
+	return flux.source
+
+
+func _rendu_utile() -> bool:
+	if not GameState.power_on or _mode_cameras:
+		return false
+	var joueur := get_tree().get_first_node_in_group(&"player") as Node3D
+	if joueur == null:
+		return true
+	return joueur.global_position.distance_to(to_global(Vector3(0.0, BUREAU_Y, ECRANS_Z))) < FLUX_DISTANCE_MAX
+
+
+func _maj_rendu() -> void:
+	var mode := SubViewport.UPDATE_ALWAYS if _rendu_utile() else SubViewport.UPDATE_DISABLED
+	for f in _flux:
+		(f.vp as SubViewport).render_target_update_mode = mode
+
+
+func _process(delta: float) -> void:
+	if _flux.is_empty():
+		return
+	_temps += delta
+	if Engine.get_process_frames() % 15 == 0:
+		_maj_rendu()
+	var s := HEURE_DEPART + int(_temps)
+	var heure := "%02d:%02d:%02d" % [s / 3600 % 24, s / 60 % 60, s % 60]
+	for f in _flux:
+		(f.heure as Label).text = heure
+		var source := f.source as SecurityCamera
+		if is_instance_valid(source):
+			(f.cam as Camera3D).global_transform = source.global_transform
+		f.reste -= delta
+		if f.reste <= 0.0:
+			f.reste = randf_range(FLUX_DUREE.x, FLUX_DUREE.y)
+			f.parasites = 1.0
+			_regler(f, _suivante(f))
+		if f.parasites > 0.0:
+			f.parasites = maxf(f.parasites - delta * 2.5, 0.0)
+			(f.mat as ShaderMaterial).set_shader_parameter(&"parasites", f.parasites)
