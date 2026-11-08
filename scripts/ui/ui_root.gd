@@ -1,10 +1,9 @@
 class_name UiRoot
 extends CanvasLayer
 ## Racine de l'UI : HUD + panneaux (construits par code, avec le thème commun).
-## Gère aussi Échap / Tab, les fondus, les flashs et l'effet de vision trouble.
 
 var hud: Hud
-var postit: PostIt
+var mini_map: MiniMap
 var document_panel: DocumentPanel
 var map_panel: MapPanel
 var inventory_panel: InventoryPanel
@@ -37,8 +36,8 @@ func _ready() -> void:
 	_root.add_child(_vision_fx)
 	hud = Hud.new()
 	_root.add_child(hud)
-	postit = PostIt.new()
-	_root.add_child(postit)
+	mini_map = MiniMap.new()
+	_root.add_child(mini_map)
 	inventory_panel = InventoryPanel.new()
 	_root.add_child(inventory_panel)
 	map_panel = MapPanel.new()
@@ -88,7 +87,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		elif inventory_panel.visible:
 			inventory_panel.close()
 		elif encounter_panel.visible or _camera_active():
-			return  # laissé au panneau de confrontation / au système de caméras
+			return
 		else:
 			pause_menu.open()
 		get_viewport().set_input_as_handled()
@@ -121,7 +120,6 @@ func _on_fade(to_black: bool, duration: float) -> void:
 	_fade_tween.tween_property(_fade, "color:a", 1.0 if to_black else 0.0, duration)
 
 
-## L'écran de fin a son propre fond noir : on retire le fondu qui le recouvrait.
 func _on_ending(ending: int) -> void:
 	ending_panel.open(ending)
 	_on_fade(false, 0.8)

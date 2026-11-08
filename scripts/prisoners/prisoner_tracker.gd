@@ -1,14 +1,11 @@
 class_name PrisonerTracker
 extends Prisoner
 ## Détenu 2 : épisode psychotique, à suivre de caméra en caméra.
-## Règle : dans une zone filmée, il n'avance que si le joueur regarde la caméra qui le
-## filme. Hors champ de toutes les caméras, il avance tout seul. Le joueur doit donc
-## passer d'une caméra à l'autre pour ne pas le perdre.
 
 signal located
 
 @export var cell_door: CellDoor
-@export var waypoints: Array[NodePath] = []  ## optionnel : sinon chemin calculé jusqu'à destination
+@export var waypoints: Array[NodePath] = []
 @export var arrival_trigger: Area3D
 @export var destination: Marker3D
 @export var attack_distance := 2.2
@@ -64,7 +61,6 @@ func _can_move() -> bool:
 	return sys != null and sys.active and cams.has(sys.current_id)
 
 
-## Identifiants des caméras qui voient ce point (dans le champ et sans mur devant).
 func cameras_seeing(point: Vector3) -> Array[StringName]:
 	var out: Array[StringName] = []
 	var space := get_world_3d().direct_space_state

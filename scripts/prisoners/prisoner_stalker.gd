@@ -1,27 +1,21 @@
 class_name PrisonerStalker
 extends Prisoner
-## Détenu 3 : coupe le générateur, rôde dans le noir, screamer au retour du courant.
-## Au tour 3, il attend dans sa cellule : il sort en courant dès que le joueur le voit à la
-## caméra (ou au bout de max_wait secondes).
-## Dans le noir il écoute : plus le joueur fait de bruit (course), plus il l'entend de loin.
 
 signal reached_generator
-signal escaped(seen: bool)  ## sorti de sa cellule ; seen = le joueur le regardait
-signal spotted              ## premier passage à l'écran pendant sa course
+signal escaped(seen: bool)
+signal spotted
 
 enum State { IDLE, WAITING, ESCAPING, STALKING, CHASING }
 
 @export var cell_door: CellDoor
-@export var escape_path: Array[NodePath] = []  ## optionnel : sinon chemin calculé
-@export var patrol_points: Array[NodePath] = []  ## optionnel : sinon couloirs au hasard
+@export var escape_path: Array[NodePath] = []  # optionnel : sinon chemin calculé
+@export var patrol_points: Array[NodePath] = []  # optionnel : sinon couloirs au hasard
 @export var generator_spot: Marker3D
 @export var run_speed := 3.2
 @export var patrol_speed := 1.5
-## Toutes les N secondes il change de cible pour rester autour du joueur.
 @export var retarget_time := 8.0
 @export var chase_speed := 3.4
 @export var catch_distance := 1.0
-## Secondes passées dans sa cellule si le joueur ne le regarde jamais.
 @export var max_wait := 40.0
 
 var state := State.IDLE
@@ -41,7 +35,6 @@ func _ready() -> void:
 	_breath.position.y = 1.5
 
 
-## Début du tour 3 : il attend dans sa cellule qu'on le regarde.
 func start_escape() -> void:
 	if resolved:
 		return
@@ -80,14 +73,12 @@ func stop_stalking() -> void:
 	_breath.stop()
 
 
-## Le joueur s'est fait attraper : le détenu repart rôder loin de lui.
 func respawn_far_from(point: Vector3) -> void:
 	var t := PrisonNav.random_tile_near(point, 18.0, 30.0)
 	global_position = PrisonNav.tile_to_world(t)
 	start_stalking()
 
 
-## Test : le place à quelques mètres du joueur (touche K en debug).
 func debug_place_near(point: Vector3) -> void:
 	var t := PrisonNav.random_tile_near(point, 5.0, 8.0)
 	global_position = PrisonNav.tile_to_world(t)

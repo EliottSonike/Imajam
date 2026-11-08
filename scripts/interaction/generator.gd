@@ -1,10 +1,8 @@
 class_name Generator
 extends Interactable
 ## Générateur à rallumer pendant la panne (le tableau électrique de la salle).
-## Son moteur s'entend de loin : c'est lui qui guide le joueur dans le noir.
 
 @export var size := Vector3(0.3, 1.1, 1.1)
-## Position du moteur par rapport au tableau électrique (d'où vient le bruit).
 @export var hum_offset := Vector3(-2.6, -0.6, -1.8)
 
 var _hum: AudioStreamPlayer3D
@@ -35,6 +33,5 @@ func interact(_player: Player) -> void:
 
 
 func _on_power_changed(on: bool) -> void:
-	# dans le noir, le moteur est le seul repère : on le rend plus présent
 	_hum.volume_db = -2.0 if on else 6.0
 	_hum.unit_size = 3.0 if on else 6.0

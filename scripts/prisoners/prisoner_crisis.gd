@@ -1,32 +1,24 @@
 class_name PrisonerCrisis
 extends Prisoner
 ## Détenu 2 : épisode psychotique.
-## Au tour 2, il s'agite dans sa cellule. Dès que le joueur le voit à la caméra (ou au bout de
-## max_wait secondes), il force sa porte, passe par les cuisines (il y prend un couteau) et
-## s'arrête au réfectoire. Quand le joueur entre dans le réfectoire, la négociation commence :
-##  - réussie : il lâche le couteau et s'assoit par terre (aucune violence) ;
-##  - ratée : il charge, couteau en avant → confrontation, sans taser possible : il faut tirer.
 
-signal escaped(seen: bool)          ## sorti de sa cellule ; seen = le joueur le regardait
-signal spotted(where: StringName)   ## premier passage à l'écran : &"route" ou &"refectoire"
-signal arrived                      ## arrivé au réfectoire
-signal calmed                       ## négociation réussie
+signal escaped(seen: bool)
+signal spotted(where: StringName)
+signal arrived  # arrivé au réfectoire
+signal calmed  # négociation réussie
 
 enum State { IDLE, WAITING, ESCAPING, REFECTOIRE, TALKING, CALM }
 
 @export var cell_door: CellDoor
-## Case du plan où il prend le couteau (cuisines), puis celle où il s'arrête (réfectoire).
 @export var kitchen_tile := Vector2i(22, 3)
 @export var refectoire_tile := Vector2i(16, 3)
 @export var run_speed := 3.0
-## Distance à laquelle la négociation commence (ou dès que le joueur entre dans le réfectoire).
 @export var talk_distance := 5.0
-## Secondes passées dans sa cellule si le joueur ne le regarde jamais.
 @export var max_wait := 40.0
 
 var state := State.IDLE
 var _wait_left := 0.0
-var _leg := 0  # 0 = vers les cuisines, 1 = vers le réfectoire
+var _leg := 0
 var _spotted_route := false
 var _spotted_refectoire := false
 var _agitation := 1.0
@@ -36,13 +28,12 @@ var _twitch_target := 0.0
 
 
 func _ready() -> void:
-	body_color = Color(0.9, 0.9, 0.86)  # camisole blanche : on ne le confond pas avec le 1
+	body_color = Color(0.9, 0.9, 0.86)
 	super._ready()
 	_build_knife()
 	Events.talk_finished.connect(_on_talk_finished)
 
 
-## Début du tour 2 : il s'agite dans sa cellule en attendant qu'on le regarde.
 func start_escape() -> void:
 	if resolved:
 		return
@@ -50,7 +41,6 @@ func start_escape() -> void:
 	_wait_left = max_wait
 
 
-## Chaque réponse le calme (+1) ou l'énerve (-1) : ça se voit à ses tremblements.
 func on_talk_answer(effect: int) -> void:
 	_agitation = clampf(_agitation - 0.3 * effect, 0.15, 1.4)
 
@@ -97,7 +87,6 @@ func _break_out(seen: bool) -> void:
 	escaped.emit(seen)
 
 
-## Le joueur arrive (dans le réfectoire, ou tout près) : la négociation commence.
 func _check_player_close() -> void:
 	var p := _player()
 	if p == null or p.is_locked():
@@ -132,13 +121,12 @@ func _on_talk_finished(id: int, success: bool) -> void:
 		calmed.emit()
 	else:
 		state = State.IDLE
-		taser_allowed = false  # il a un couteau : pas le temps de sortir le taser
+		taser_allowed = false
 		attack_player()
 		if p:
 			p.set_lock(&"talk", false)
 
 
-## Tremblements de la crise : d'autant plus forts qu'il est agité.
 func _process(delta: float) -> void:
 	super._process(delta)
 	if resolved or _busy or _model == null or state == State.IDLE:
@@ -150,8 +138,6 @@ func _process(delta: float) -> void:
 	_model.rotation.y = lerpf(_model.rotation.y, _twitch_target, minf(1.0, 20.0 * delta))
 	_model.rotation.x = randf_range(-0.04, 0.04) * _agitation
 
-
-# --- Couteau et fin calme ---
 
 func _build_knife() -> void:
 	_knife = MeshInstance3D.new()

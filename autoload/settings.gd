@@ -1,5 +1,4 @@
 extends Node
-## Réglages du joueur (volume, sensibilité, plein écran), sauvegardés dans user://settings.cfg.
 
 const PATH := "user://settings.cfg"
 

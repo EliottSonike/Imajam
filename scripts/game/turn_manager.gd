@@ -1,18 +1,6 @@
 class_name TurnManager
 extends Node
-## Machine à états : intro → tour 1 → tour 2 → tour 3 → panne → fin.
-## Entre deux tours, le joueur doit revenir au poste de surveillance :
-## le tour suivant démarre quand il rallume les caméras.
-##
-## Le téléphone ne sonne qu'au début. Ensuite, c'est le garde qui pense à voix haute, et ses
-## répliques se déclenchent au moment où il VOIT ce qui se passe à l'écran.
-##  - Tour 1 : la cellule 1 paraît vide à l'écran (le détenu est dans l'angle mort).
-##  - Tour 2 : le détenu 2 sort quand on le regarde, prend un couteau aux cuisines et attend au
-##             réfectoire. Négociation sur place : réussie = aucun mort, ratée = il faut tirer.
-##  - Tour 3 : le détenu 3 sort en courant quand on le regarde et coupe le générateur.
-##
-## Raccourcis de test (uniquement en debug) : F2 = tour 2, F3 = tour 3, F4 = panne, J = fin,
-## K = détenu 3 tout près (panne), F7 = téléporter le joueur au prochain lieu clé.
+## Machine à états : intro -> tour 1 -> tour 2 -> tour 3 -> panne -> fin.
 
 enum Phase { INTRO, TURN_1, TURN_2, TURN_3, BLACKOUT, ENDING }
 
@@ -22,7 +10,7 @@ enum Phase { INTRO, TURN_1, TURN_2, TURN_3, BLACKOUT, ENDING }
 
 var phase := Phase.INTRO
 var _turn_1_cell_seen := false
-var _next_turn_on_cameras := -1  ## tour à lancer au prochain passage au poste
+var _next_turn_on_cameras := -1
 var _final_return := false
 var _checkpoint_pos := Vector3.ZERO
 var _checkpoint_yaw := 0.0
@@ -32,14 +20,14 @@ var _p3_exit_said := false
 
 ## Lieux de téléportation de test (position, orientation).
 const DEBUG_SPOTS := [
-	[Vector3(3.5, 0.05, -21.4), 0.0],         # devant la cellule 1
-	[Vector3(4.9, 0.05, -16.1), PI],          # entrée de la réserve (taser)
+	[Vector3(3.5, 0.05, -21.4), 0.0],  # devant la cellule 1
+	[Vector3(4.9, 0.05, -16.1), PI],  # entrée de la réserve (taser)
 	[Vector3(21.7, 0.05, -13.3), -PI / 2.0],  # entrée de l'infirmerie (médicaments)
-	[Vector3(39.9, 0.05, -3.5), 0.0],         # bloc B, devant la cellule 2
-	[Vector3(18.9, 0.05, -17.5), 0.0],        # devant le réfectoire (porte sud)
-	[Vector3(14.7, 0.05, -7.7), 0.0],         # devant la cellule 3
+	[Vector3(39.9, 0.05, -3.5), 0.0],  # bloc B, devant la cellule 2
+	[Vector3(18.9, 0.05, -17.5), 0.0],  # devant le réfectoire (porte sud)
+	[Vector3(14.7, 0.05, -7.7), 0.0],  # devant la cellule 3
 	[Vector3(43.0, 0.05, -24.8), -PI / 2.0],  # salle du générateur
-	[Vector3(0.0, 0.05, 0.0), PI],            # bureau
+	[Vector3(0.0, 0.05, 0.0), PI],  # bureau
 ]
 
 
@@ -50,6 +38,7 @@ func _ready() -> void:
 	Events.camera_mode_changed.connect(_on_camera_mode_changed)
 	Events.power_changed.connect(_on_power_changed)
 	Events.player_caught.connect(_on_player_caught)
+	Events.map_taken.connect(_on_map_taken)
 	if prisoner_2:
 		prisoner_2.escaped.connect(_on_prisoner_2_escaped)
 		prisoner_2.spotted.connect(_on_prisoner_2_spotted)
@@ -65,7 +54,6 @@ func _ready() -> void:
 
 
 func _process(_delta: float) -> void:
-	# fin de partie : le joueur revient au bureau après le 3e détenu
 	if _final_return and phase == Phase.BLACKOUT:
 		var p := _player()
 		if p and PrisonNav.room_at(p.global_position) == "B":
@@ -86,7 +74,7 @@ func _enter(p: Phase) -> void:
 			await get_tree().create_timer(2.2).timeout
 			await Dialogue.say(&"intro")  # le seul appel du jeu
 			if phase != Phase.INTRO:
-				return  # un raccourci de test a déjà fait avancer la partie
+				return
 			_objective(&"intro")
 			_enter(Phase.TURN_1)
 		Phase.TURN_1:
@@ -127,8 +115,6 @@ func _enter(p: Phase) -> void:
 			Events.ending_reached.emit(GameState.compute_ending())
 
 
-# --- Tour 1 ---
-
 func _on_camera_mode_changed(on: bool) -> void:
 	if not on:
 		return
@@ -144,7 +130,6 @@ func _on_camera_mode_changed(on: bool) -> void:
 		_enter(Phase.TURN_3)
 
 
-## Le joueur regarde la caméra de la cellule 1 : elle paraît vide.
 func _on_camera_viewed(camera_id: StringName) -> void:
 	if phase != Phase.TURN_1 or camera_id != &"cell_1" or _turn_1_cell_seen:
 		return
@@ -171,8 +156,6 @@ func _on_encounter_resolved(prisoner_id: int, killed: bool) -> void:
 			_objective(&"turn_3_done")
 			_final_return = true
 
-
-# --- Tour 2 : le détenu 2 ---
 
 func _on_prisoner_2_escaped(seen: bool) -> void:
 	if phase != Phase.TURN_2:
@@ -214,8 +197,6 @@ func _on_prisoner_2_calmed() -> void:
 	_next_turn_on_cameras = 3
 
 
-# --- Tour 3 : le détenu 3 ---
-
 func _on_prisoner_3_escaped(seen: bool) -> void:
 	if phase != Phase.TURN_3:
 		return
@@ -243,6 +224,11 @@ func _on_power_changed(on: bool) -> void:
 			prisoner_3.screamer_at(player)
 
 
+func _on_map_taken() -> void:
+	if phase == Phase.BLACKOUT and not GameState.power_on:
+		_objective(&"blackout_carte")
+
+
 func _on_player_caught() -> void:
 	var player := _player()
 	if player == null:
@@ -261,8 +247,6 @@ func _on_player_caught() -> void:
 	player.set_lock(&"caught", false)
 
 
-# --- Raccourcis de test ---
-
 func _unhandled_input(event: InputEvent) -> void:
 	if not OS.is_debug_build():
 		return
@@ -276,10 +260,10 @@ func _unhandled_input(event: InputEvent) -> void:
 			_debug_skip(3)
 		KEY_F4:
 			_debug_skip(4)
-		KEY_J:  # fin (F6, F8, F9 sont pris par l'éditeur quand le jeu tourne)
+		KEY_J:
 			if phase != Phase.ENDING:
 				_enter(Phase.ENDING)
-		KEY_K:  # pendant la panne : le détenu 3 à quelques mètres
+		KEY_K:
 			var p := _player()
 			if p and prisoner_3 and phase == Phase.BLACKOUT and not prisoner_3.resolved:
 				prisoner_3.debug_place_near(p.global_position)
@@ -311,8 +295,6 @@ func _debug_skip(to: int) -> void:
 			prisoner_3.cell_door.open()
 		_on_prisoner_3_reached_generator()
 
-
-# --- Utilitaires ---
 
 func _objective(key: StringName) -> void:
 	Events.objective_changed.emit(Texts.OBJECTIVES.get(key, ""))

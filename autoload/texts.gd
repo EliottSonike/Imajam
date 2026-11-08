@@ -1,5 +1,5 @@
 extends Node
-## Tous les textes du jeu. Ce sont des textes PROVISOIRES, à réécrire par l'équipe.
+## Tous les textes du jeu.
 
 const INTRO_TITLE := "LE COURRIER DU SOIR — Édition de nuit"
 const INTRO_BODY := """[b]ÉVASION À LA PRISON SAINT-ROCH[/b]
@@ -14,7 +14,6 @@ Cette nuit, la surveillance est assurée par un seul garde, depuis le poste de c
 
 const CONTROLS := "ZQSD / WASD : se déplacer   Maj : courir   E : interagir   Tab : inventaire   R : médicaments   Échap : pause"
 
-## Noms affichés dans les sous-titres ("" = pensées du garde, en italique).
 const SPEAKER_NAMES: Dictionary = {
 	&"telephone": "Téléphone",
 	&"joueur": "",
@@ -23,11 +22,8 @@ const SPEAKER_NAMES: Dictionary = {
 	&"detenu_3": "Détenu 3",
 }
 
-## Répliques : chaque clé = une suite de [personnage, texte], déclenchée par Dialogue.say(clé).
-## Le téléphone n'appelle qu'au début ; ensuite c'est le garde qui pense à voix haute.
-## Voix enregistrées : assets/voix/<personnage>/<clé>_<n>.ogg (n = 1, 2…), voir A_ENREGISTRER.md.
 const LINES: Dictionary = {
-	&"intro": [  # Appel au début de la nuit (le seul coup de téléphone du jeu)
+	&"intro": [
 		[&"telephone", "Allô ? C'est moi. Tu as pris ton poste, parfait."],
 		[&"telephone", "Il ne reste que trois détenus. Ils ne doivent pas quitter leur cellule."],
 		[&"telephone", "Installe-toi aux écrans, au fond du bureau. Commence par la cellule 1 : le 1 ne répond plus."],
@@ -72,12 +68,13 @@ const LINES: Dictionary = {
 	],
 	&"blackout": [  # Coupure de courant
 		[&"joueur", "Le courant ! Il a coupé le générateur…"],
-		[&"joueur", "J'entends le moteur d'ici. Il faut que je suive le bruit."],
+		[&"joueur", "Le voyant de secours éclaire la carte du bureau. Je vais la prendre."],
+		[&"joueur", "Et après, suivre le bruit du moteur."],
 	],
 	&"caught": [  # Le détenu 3 l'a attrapé dans le noir
 		[&"joueur", "…Ma tête… Il m'a laissé là. Le générateur. Vite."],
 	],
-	&"detenu_3_screamer": [  # Le courant revient, le détenu 3 est devant lui
+	&"detenu_3_screamer": [
 		[&"detenu_3", "Tu m'as cherché dans le noir ?"],
 	],
 	&"turn_3_done": [  # Après le détenu 3
@@ -85,11 +82,6 @@ const LINES: Dictionary = {
 	],
 }
 
-## Négociation avec le détenu 2 au réfectoire : 3 échanges, 3 réponses (mélangées à l'écran).
-## Chaque réponse : [texte du joueur, effet, réaction du détenu]. Effet : +1 le rassure, 0 neutre,
-## -1 l'énerve. Il faut au moins TALK_2_NEEDED points à la fin, sinon il charge avec son couteau
-## (et là, pas de taser : il faut tirer).
-## Voix : detenu_2/negociation_<n>, detenu_2/negociation_<n>_reaction_<k>, joueur/negociation_<n>_reponse_<k>.
 const TALK_2_NEEDED := 2
 const TALK_2: Array = [
 	{
@@ -117,7 +109,6 @@ const TALK_2: Array = [
 		],
 	},
 ]
-## Voix : detenu_2/negociation_reussie et detenu_2/negociation_ratee.
 const TALK_2_END := {
 	"success": "D'accord… D'accord. Je pose le couteau.",
 	"fail": "Menteur ! Tu es avec LUI !",
@@ -134,11 +125,12 @@ const OBJECTIVES: Dictionary = {
 	&"turn_2_done": "Retourner au poste de surveillance",
 	&"turn_3": "Regarder la cellule 3 (CAM 06)",
 	&"turn_3_sortie": "Suivre le détenu 3 sur les caméras",
-	&"blackout": "Rallumer le générateur (suis le bruit du moteur)",
+	&"blackout": "Prendre la carte du bureau (voyant rouge)",
+	&"blackout_carte": "Rallumer le générateur (suis la carte et le bruit du moteur)",
 	&"turn_3_done": "Retourner au bureau",
 }
 
-## Bouts de journal : le carnet du gardien disparu. Le 4e (index 3) est bien caché.
+## Bouts de journal : le carnet du gardien disparu.
 const JOURNALS: Array = [
 	{
 		"title": "Carnet du gardien — page 1",

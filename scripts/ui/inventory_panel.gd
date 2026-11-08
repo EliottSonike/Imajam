@@ -1,7 +1,5 @@
 class_name InventoryPanel
 extends Control
-## Items à gauche, journal à droite : une page en 4 morceaux (le coin bas droit = le
-## morceau caché). La page vide montre tout de suite qu'il manque des morceaux.
 
 var _items: VBoxContainer
 var _page: GridContainer

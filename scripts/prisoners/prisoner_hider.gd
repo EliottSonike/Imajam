@@ -1,7 +1,6 @@
 class_name PrisonerHider
 extends Prisoner
 ## Détenu 1 : caché dans sa cellule (invisible aux caméras), attaque à l'arrivée.
-## Il se colle dans l'angle mort, sous la caméra : sur l'écran, la cellule paraît vide.
 
 @export var cell_trigger: Area3D
 @export var cell_door: CellDoor

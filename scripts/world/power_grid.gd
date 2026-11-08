@@ -1,8 +1,6 @@
 class_name PowerGrid
 extends Node
 ## Allume / éteint les lumières pendant la panne.
-## Lumières : groupe « power_lights » (OmniLight3D). Néons : groupe « power_lamps ».
-## Panne = noir total (lumière ambiante coupée), comme le veut la contrainte de la jam.
 
 @export var world_environment: WorldEnvironment
 

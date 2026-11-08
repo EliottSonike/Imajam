@@ -2,15 +2,13 @@ class_name Player
 extends CharacterBody3D
 ## Contrôleur FPS du garde.
 
-## Calque de rendu du corps du joueur : visible sur les caméras de surveillance,
-## mais pas dans la vue du joueur.
 const BODY_LAYER := 3
 
 @export var walk_speed := 3.0
 @export var sprint_speed := 5.0
-@export var mouse_sensitivity := 0.0025  ## remplacée par le réglage des options
+@export var mouse_sensitivity := 0.0025  # remplacée par le réglage des options
 @export var eye_height := 1.6
-@export var keyboard_turn_speed := 2.4  ## rad/s, flèches du clavier
+@export var keyboard_turn_speed := 2.4  # rad/s, flèches du clavier
 
 @onready var head: Node3D = $Head
 @onready var camera: Camera3D = $Head/Camera3D
@@ -41,7 +39,6 @@ func _ready() -> void:
 	make_view_current()
 
 
-## Regard à la souris : dans _input pour qu'aucun élément d'interface ne l'intercepte.
 func _input(event: InputEvent) -> void:
 	var motion := event as InputEventMouseMotion
 	if motion == null or is_locked() or Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
@@ -92,8 +89,6 @@ func _physics_process(delta: float) -> void:
 	_update_target()
 
 
-# --- Contrat Player (utilisé par les panneaux, les caméras et les détenus) ---
-
 func set_lock(reason: StringName, locked: bool) -> void:
 	if locked:
 		_locks[reason] = true
@@ -113,7 +108,6 @@ func make_view_current() -> void:
 	camera.make_current()
 
 
-## Distance à laquelle le détenu 3 entend le joueur dans le noir.
 func noise_radius() -> float:
 	if is_sprinting:
 		return 9.0
@@ -122,7 +116,6 @@ func noise_radius() -> float:
 	return 2.0
 
 
-## Tourne le joueur vers un point (utilisé quand un détenu l'attaque).
 func face_point(point: Vector3, duration := 0.25) -> void:
 	var d := point - head.global_position
 	var yaw := atan2(-d.x, -d.z)
@@ -138,8 +131,6 @@ func teleport(pos: Vector3, yaw: float) -> void:
 	head.rotation.x = 0.0
 	velocity = Vector3.ZERO
 
-
-# --- Interne ---
 
 func _update_head(delta: float, moving: bool, speed: float) -> void:
 	if moving:

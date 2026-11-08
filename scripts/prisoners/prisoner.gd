@@ -1,10 +1,7 @@
 class_name Prisoner
 extends Node3D
-## Base des trois psychopathes. Modèle provisoire : une capsule orange avec un numéro
-## et des yeux rouges (visibles dans le noir). Le nœud « Modele » est à remplacer
-## par le vrai modèle quand il sera prêt.
+## Base des trois psychopathes.
 
-## Calque de rendu que les caméras de surveillance n'affichent pas.
 const HIDDEN_FROM_CAMERAS_LAYER := 2
 
 @export var prisoner_id := 0
@@ -12,10 +9,8 @@ const HIDDEN_FROM_CAMERAS_LAYER := 2
 @export var walk_speed := 1.4
 ## Couleur de la capsule (orange = tenue de détenu).
 @export var body_color := Color(0.85, 0.36, 0.07)
-## Réplique dite au moment de l'attaque (clé de Texts.LINES, vide = rien).
 @export var attack_line: StringName = &""
 
-## Faux quand le joueur n'a pas le temps de sortir le taser (il doit tirer).
 var taser_allowed := true
 
 var resolved := false
@@ -57,7 +52,6 @@ func start_escape() -> void:
 	pass
 
 
-## Attaque scriptée : le détenu fonce sur le joueur, puis la confrontation s'ouvre.
 func attack_player() -> void:
 	var player := _player()
 	if player == null or resolved:
@@ -85,7 +79,6 @@ func attack_player() -> void:
 	Events.encounter_requested.emit(self)
 
 
-## Fin de la confrontation : tasé (tremble puis tombe) ou abattu (tombe).
 func on_resolved(killed: bool) -> void:
 	resolved = true
 	_busy = true
@@ -111,19 +104,16 @@ func on_resolved(killed: bool) -> void:
 			(eye as Node3D).visible = false
 
 
-## Invisible sur les caméras de surveillance (mais visible à l'œil nu).
 func set_hidden_from_cameras(hidden: bool) -> void:
 	for vi in _model.find_children("*", "VisualInstance3D", true, false):
 		(vi as VisualInstance3D).layers = (1 << (HIDDEN_FROM_CAMERAS_LAYER - 1)) if hidden else 1
 
 
-## Vrai si le joueur est aux écrans et que la caméra affichée montre le détenu.
 func seen_on_screen() -> bool:
 	var sys := get_tree().get_first_node_in_group(&"camera_system") as CameraSystem
 	return sys != null and sys.active and camera_sees(sys.current_camera())
 
 
-## Même chose, vérifié 5 fois par seconde seulement (à appeler à chaque image).
 func _update_seen(delta: float) -> bool:
 	_seen_check -= delta
 	if _seen_check <= 0.0:
@@ -132,7 +122,6 @@ func _update_seen(delta: float) -> bool:
 	return _seen_cache
 
 
-## Vrai si cette caméra voit le détenu (dans le champ et sans mur devant).
 func camera_sees(cam: SecurityCamera) -> bool:
 	if cam == null:
 		return false
@@ -151,14 +140,12 @@ func face_instant(point: Vector3) -> void:
 		rotation.y = atan2(-d.x, -d.z)
 
 
-# --- Déplacement le long d'un chemin (centres des cases de PrisonNav) ---
-
 func _set_path(path: PackedVector3Array, start_index := 0) -> void:
 	_path = path
 	_path_i = mini(start_index, maxi(path.size() - 1, 0))
 
 
-## Avance vers la fin du chemin. Renvoie true une fois arrivé.
+## Avance vers la fin du chemin.
 func _follow_path(delta: float, speed: float) -> bool:
 	if _path_i >= _path.size():
 		_moving = false
@@ -231,7 +218,7 @@ func _build_model() -> void:
 	number.pixel_size = 0.003
 	number.modulate = Color(0.05, 0.05, 0.05)
 	number.outline_size = 0
-	number.shaded = true  # reçoit la lumière : invisible dans le noir, comme le corps
+	number.shaded = true
 	number.position = Vector3(0.0, 1.15, -0.305)
 	number.rotation.y = PI
 	_model.add_child(number)

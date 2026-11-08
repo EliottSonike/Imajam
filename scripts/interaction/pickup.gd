@@ -1,6 +1,6 @@
 class_name Pickup
 extends Interactable
-## Item ramassable (taser, médicaments). Modèle provisoire en boîtes.
+## Item ramassable (taser, médicaments).
 
 @export var item_id: StringName = &""
 @export var count := 1

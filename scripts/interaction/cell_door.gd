@@ -1,11 +1,10 @@
 class_name CellDoor
 extends Interactable
-## Porte de cellule à barreaux. Elle coulisse dans le mur quand elle s'ouvre.
+## Porte de cellule à barreaux.
 
 @export var locked := true
 @export var width := 1.2
 @export var height := 2.3
-## Déplacement des barreaux à l'ouverture (repère local de la porte).
 @export var slide := Vector3(1.25, 0.0, 0.0)
 
 var is_open := false
