@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://bxh6bqyadwjj7"]
 
 [ext_resource type="Script" uid="uid://bvdvhf4l4ipnn" path="res://scripts/game/turn_manager.gd" id="1"]
-[ext_resource type="PackedScene" uid="uid://ljju3hj10g8m" path="res://scenes/player.tscn" id="1_tipki"]
+[ext_resource type="PackedScene" uid="uid://dfocrrvqf6nxu" path="res://scenes/player.tscn" id="1_tipki"]
 [ext_resource type="Script" uid="uid://cl4g6mnwxt1kh" path="res://scripts/cameras/camera_system.gd" id="2"]
 [ext_resource type="Script" uid="uid://dpbrrxll6ywov" path="res://scripts/world/power_grid.gd" id="3"]
 [ext_resource type="PackedScene" uid="uid://b3qo55377yqgh" path="res://scenes/level.tscn" id="5_85g3d"]

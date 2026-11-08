@@ -6,7 +6,7 @@ const INTRO_BODY := """[b]ÉVASION À LA PRISON SAINT-ROCH[/b]
 
 Trois jours après l'évasion d'un détenu de l'aile psychiatrique, la direction assure que la situation est « sous contrôle ». L'établissement, qui enfermait quatre des criminels les plus dangereux du pays, n'en compte désormais plus que trois.
 
-Le fugitif, que le personnel appelle « le Quatrième », n'a toujours pas été retrouvé. Le gardien de nuit Marc Lemoine n'a pas reparu à son poste depuis. Les enquêteurs n'excluent aucune piste.
+Le fugitif n'a toujours pas été retrouvé. Les enquêteurs n'excluent aucune piste.
 
 Cette nuit, la surveillance est assurée par un seul garde, depuis le poste de contrôle.
 
@@ -33,11 +33,11 @@ const LINES: Dictionary = {
 		[&"joueur", "Bon. La cellule 1 d'abord… caméra 2."],
 	],
 	&"turn_1_empty": [  # Il voit la cellule 1 vide à l'écran
-		[&"joueur", "Vide ?! La porte n'a pas bougé… Il est forcément encore là-dedans."],
-		[&"joueur", "Je déverrouille la cellule à distance. J'y vais. Il me faut de quoi me défendre."],
+		[&"joueur", "Quoi ?! La porte n'a pas bougé… Il est forcément encore là-dedans."],
+		[&"joueur", "J'y vais. Il me faut de quoi me défendre."],
 	],
 	&"detenu_1_attaque": [  # Le détenu 1 sort de l'angle mort
-		[&"detenu_1", "Tu ne m'avais pas vu, hein ?"],
+		[&"detenu_1", "COUCOU, j'étais bien caché ?"],
 	],
 	&"turn_1_done": [  # Après le détenu 1
 		[&"joueur", "Un de moins… Retour aux écrans."],
@@ -46,36 +46,35 @@ const LINES: Dictionary = {
 		[&"joueur", "Le bloc B est agité ce soir… Voyons la cellule 2. Caméra 9."],
 	],
 	&"turn_2_sortie": [  # Il voit le détenu 2 sortir de sa cellule
-		[&"joueur", "Le 2 ! Il a forcé sa porte… Il part vers les cuisines !"],
+		[&"joueur", "Le 2 ! Il a forcé sa porte… Il part vers les cuisines…"],
 	],
 	&"turn_2_refectoire": [  # Il voit le détenu 2 arrêté au réfectoire
 		[&"joueur", "Il s'est arrêté au réfectoire… Il tient quelque chose. Un couteau ? Je dois y aller."],
 	],
 	&"detenu_2_couteau": [  # Le joueur entre dans le réfectoire
-		[&"detenu_2", "N'approche pas ! J'ai un couteau… Je l'ai pris aux cuisines !"],
+		[&"detenu_2", "N'approche pas ! J'ai un couteau… Je n'hésiterai pas à l'utiliser"],
 	],
 	&"turn_2_calme": [  # Négociation réussie
-		[&"joueur", "Il a lâché le couteau… C'est fini. Retour aux écrans."],
+		[&"joueur", "Il a lâché le couteau… C'est fini. Il faut que je retourne au bureau."],
 	],
 	&"turn_2_tue": [  # Négociation ratée : le joueur a dû tirer
-		[&"joueur", "Je n'avais pas le choix… Je n'avais pas le choix. Retour aux écrans."],
+		[&"joueur", "Je n'avais pas le choix… Je n'avais pas le choix. Il m'a attaqué, il faut que je retourne au bureau."],
 	],
 	&"turn_3": [  # Retour aux écrans après le détenu 2
 		[&"joueur", "Plus que le 3. Cellule 3… caméra 6."],
 	],
 	&"turn_3_sortie": [  # Il voit le détenu 3 courir
-		[&"joueur", "Le 3 sort ! Il court… vers le générateur ?! S'il coupe le courant, je suis aveugle."],
+		[&"joueur", "Le 3 sort ! Il court… vers le générateur ?! S'il coupe le courant, je suis mal !"],
 	],
 	&"blackout": [  # Coupure de courant
 		[&"joueur", "Le courant ! Il a coupé le générateur…"],
-		[&"joueur", "Le voyant de secours éclaire la carte du bureau. Je vais la prendre."],
-		[&"joueur", "Et après, suivre le bruit du moteur."],
+		[&"joueur", "Il faut que j'aille le redémarrer."],
 	],
 	&"caught": [  # Le détenu 3 l'a attrapé dans le noir
 		[&"joueur", "…Ma tête… Il m'a laissé là. Le générateur. Vite."],
 	],
 	&"detenu_3_screamer": [
-		[&"detenu_3", "Tu m'as cherché dans le noir ?"],
+		[&"detenu_3", "A MON TOUR"],
 	],
 	&"turn_3_done": [  # Après le détenu 3
 		[&"joueur", "C'est fini… Les trois sont maîtrisés. Retour au bureau."],
@@ -134,7 +133,7 @@ const OBJECTIVES: Dictionary = {
 const JOURNALS: Array = [
 	{
 		"title": "Carnet du gardien — page 1",
-		"body": "Le 1 connaît tous les angles morts. Hier soir, sur l'écran, sa cellule était vide. Je suis descendu : il était là, plaqué contre le mur, juste sous la caméra. Il m'a souri.\n\nIl dit que c'est le Quatrième qui lui a appris à disparaître.",
+		"body": "Le 1 connaît tous les angles morts. Hier soir, sur l'écran, sa cellule était vide. Je suis descendu : il était là, plaqué contre le mur, juste sous la caméra. Il m'a souri.\n\nIl parle d'un maître qui lui aurait appris à disparaître.",
 	},
 	{
 		"title": "Carnet du gardien — page 2",
@@ -142,11 +141,11 @@ const JOURNALS: Array = [
 	},
 	{
 		"title": "Carnet du gardien — page 3",
-		"body": "Le 3 a déjà coupé le courant deux fois. Dans le noir, il entend tout.\n\nLe Quatrième, lui, n'a pas peur du noir. La nuit, il s'assoit au poste et regarde les écrans, comme nous. Il passe des heures au téléphone. Je n'ai jamais su avec qui.",
+		"body": "Le 3 a déjà coupé le courant deux fois. Dans le noir, il entend tout.\n\nIl est maladivement jaloux du Quatrième : il veut être comme lui.",
 	},
 	{
 		"title": "Carnet du gardien — dernière page",
-		"body": "Si quelqu'un lit ceci, c'est que je ne suis plus là.\n\nLe Quatrième ne s'est pas évadé. Il a pris mes clés, mon badge, mon uniforme. Il a pris ma place au poste.\n\nSi tu lis ces lignes assis dans mon fauteuil… alors tu sais qui tu es.",
+		"body": "Le Quatrième est très curieux, trop curieux, il me met mal à l'aise.\n\nJ'ai l'impression qu'il m'observe constamment. Je l'ai même surpris en train de s'entraîner à m'imiter.\n\nJe sens que je ne rentrerai pas chez moi ce soir.",
 	},
 ]
 
@@ -173,6 +172,6 @@ const ENDINGS: Dictionary = {
 	3: {
 		"title": "LE TRUAND",
 		"subtitle": "Fin secrète",
-		"body": "Les quatre pages réunies ne laissent aucun doute : le gardien disparu, c'était lui. Toi, tu es le Quatrième.\n\nTu plies soigneusement les pages, tu les glisses dans la poche de ton uniforme, et tu reprends ta place devant les écrans.\n\nCette prison n'a jamais été aussi bien gardée. Et maintenant, elle est à toi.",
+		"body": "Les quatre pages réunies ne laissent aucun doute : tu n'es pas à ta place.\n\nTu plies soigneusement les pages, tu les glisses dans la poche de ton uniforme, et tu reprends ta place devant les écrans.\n\nCette prison n'a jamais été aussi bien gardée. Et maintenant, elle est à toi.",
 	},
 }
