@@ -35,7 +35,7 @@ func enter() -> void:
 func exit() -> void:
 	if not active :
 		return
-	active = false 
+	active = false
 	current_id = &""
 	var p := _player()
 	if p :
@@ -48,22 +48,37 @@ func is_watching(camera_id: StringName) -> bool:
 	return active and current_id == camera_id
 
 
+## Caméra affichée (null hors du mode caméras).
+func current_camera() -> SecurityCamera:
+	if not active or _cams.is_empty():
+		return null
+	return _cams[_index]
+
+
+func camera_number() -> int:
+	return _index + 1
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if not active :
 		return
 	if event.is_action_pressed(&"cam_next") :
 		_show(wrapi(_index + 1, 0, _cams.size()))
+		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed(&"cam_prev") :
 		_show(wrapi(_index - 1, 0, _cams.size()))
+		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed(&"cancel"):
 		exit()
-	
+		get_viewport().set_input_as_handled()
+
 func _player() -> Player:
 	return get_tree().get_first_node_in_group(&"player") as Player
-	
+
 func _show(i: int) -> void:
 	_index = i
 	var cam := _cams[i]
 	cam.current = true
 	current_id = cam.camera_id
+	Sfx.play("static", -14.0)
 	Events.camera_viewed.emit(cam.camera_id)

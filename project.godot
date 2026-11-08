@@ -15,7 +15,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 [application]
 
 config/name="Imajam - Surveillance"
-run/main_scene="res://scenes/main.tscn"
+run/main_scene="res://scenes/menu.tscn"
 config/features=PackedStringArray("4.7", "Forward Plus")
 
 [autoload]
@@ -24,6 +24,9 @@ Events="*res://autoload/events.gd"
 GameState="*res://autoload/game_state.gd"
 Texts="*res://autoload/texts.gd"
 InputSetup="*res://autoload/input_setup.gd"
+Settings="*res://autoload/settings.gd"
+Sfx="*res://autoload/sfx.gd"
+PrisonNav="*res://autoload/prison_nav.gd"
 
 [display]
 
@@ -34,3 +37,11 @@ window/size/viewport_height=720
 
 version_control/plugin_name="GitPlugin"
 version_control/autoload_on_startup=true
+
+[layer_names]
+
+3d_render/layer_1="Monde"
+3d_render/layer_2="Cache aux cameras"
+3d_render/layer_3="Corps du joueur"
+3d_physics/layer_1="Monde"
+3d_physics/layer_3="Interactions"

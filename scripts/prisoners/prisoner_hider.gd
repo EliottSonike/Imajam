@@ -1,14 +1,32 @@
 class_name PrisonerHider
 extends Prisoner
 ## Détenu 1 : caché dans sa cellule (invisible aux caméras), attaque à l'arrivée.
+## Il se colle dans l'angle mort, sous la caméra : sur l'écran, la cellule paraît vide.
 
 @export var cell_trigger: Area3D
 @export var cell_door: CellDoor
+@export var hide_spot: Marker3D
+
+var _waiting := false
+
+
+func _ready() -> void:
+	if attack_line == &"":
+		attack_line = &"detenu_1_attaque"
+	super._ready()
+	if cell_trigger:
+		cell_trigger.body_entered.connect(_on_cell_trigger_body_entered)
 
 
 func start_escape() -> void:
-	pass
+	set_hidden_from_cameras(true)
+	if hide_spot:
+		global_position = hide_spot.global_position
+		rotation.y = hide_spot.global_rotation.y
+	_waiting = true
 
 
 func _on_cell_trigger_body_entered(body: Node3D) -> void:
-	pass
+	if _waiting and not resolved and body is Player:
+		_waiting = false
+		attack_player()
