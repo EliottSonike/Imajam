@@ -1,3 +1,89 @@
 [gd_scene format=3 uid="uid://c88jyqqeyur4k"]
 
+[ext_resource type="Script" uid="uid://i7vtpofiyvan" path="res://scripts/cameras/security_camera.gd" id="1_cam"]
+
 [node name="Cameras" type="Node3D" unique_id=2016051282]
+
+[node name="CAM_1_Bloc_A" type="Camera3D" parent="."]
+transform = Transform3D(-0.0305981, -0.122852, 0.991953, 3.03568e-09, 0.992418, 0.12291, -0.999532, 0.0037608, -0.0303661, 10.92, 2.7, -22.12)
+script = ExtResource("1_cam")
+camera_id = &"bloc_a"
+label = "Bloc A"
+
+[node name="CAM_2_Cellule_1" type="Camera3D" parent="."]
+transform = Transform3D(0.707107, 0.308505, -0.636258, -3.68217e-09, 0.899805, 0.436292, 0.707107, -0.308505, 0.636259, 1.68, 2.7, -22.68)
+script = ExtResource("1_cam")
+camera_id = &"cell_1"
+label = "Cellule 1"
+
+[node name="CAM_3_Bloc_B" type="Camera3D" parent="."]
+transform = Transform3D(-0.999532, -0.00376074, 0.0303662, 6.06341e-08, 0.992418, 0.122909, -0.0305982, 0.122852, -0.991953, 40.32, 2.7, -12.32)
+script = ExtResource("1_cam")
+camera_id = &"bloc_b"
+label = "Bloc B"
+
+[node name="CAM_4_Couloir_Central" type="Camera3D" parent="."]
+transform = Transform3D(-0.0202663, 0.0817381, -0.996448, 3.61388e-09, 0.996652, 0.0817549, 0.999795, 0.00165687, -0.0201984, 10.08, 2.7, -17.92)
+script = ExtResource("1_cam")
+camera_id = &"couloir_central"
+label = "Couloir central"
+
+[node name="CAM_5_Couloir_Sud" type="Camera3D" parent="."]
+transform = Transform3D(-0.0305981, 0.122852, -0.991953, -3.03568e-09, 0.992418, 0.12291, 0.999532, 0.0037608, -0.0303661, 8.68, 2.7, -8.12)
+script = ExtResource("1_cam")
+camera_id = &"couloir_sud"
+label = "Couloir sud"
+
+[node name="CAM_6_Cellule_3" type="Camera3D" parent="."]
+transform = Transform3D(0.707107, 0.308505, -0.636258, -3.68217e-09, 0.899805, 0.436292, 0.707107, -0.308505, 0.636259, 12.88, 2.7, -10.08)
+script = ExtResource("1_cam")
+camera_id = &"cell_3"
+label = "Cellule 3"
+
+[node name="CAM_7_Acces_Generateur" type="Camera3D" parent="."]
+transform = Transform3D(-0.0384332, -0.1536, 0.987385, -3.12457e-08, 0.988115, 0.153714, -0.999261, 0.00590768, -0.0379765, 47.32, 2.7, -16.52)
+script = ExtResource("1_cam")
+camera_id = &"acces_generateur"
+label = "Accès générateur"
+
+[node name="CAM_8_Generateur" type="Camera3D" parent="."]
+transform = Transform3D(-0.707107, -0.243812, 0.663744, 7.505e-08, 0.938675, 0.344802, -0.707107, 0.243812, -0.663744, 44.52, 2.7, -27.72)
+script = ExtResource("1_cam")
+camera_id = &"generateur"
+label = "Générateur"
+
+[node name="CAM_9_Cellule_2" type="Camera3D" parent="."]
+transform = Transform3D(-0.707107, 0.308505, -0.636258, -4.47737e-08, 0.899805, 0.436292, 0.707107, 0.308505, -0.636259, 40.88, 2.7, -6.72)
+script = ExtResource("1_cam")
+camera_id = &"cell_2"
+label = "Cellule 2"
+
+[node name="CAM_10_Hall_Bureau" type="Camera3D" parent="."]
+transform = Transform3D(-0.0254158, -0.102299, 0.994429, -1.05189e-08, 0.99475, 0.102332, -0.999677, 0.00260084, -0.0252824, 13.72, 2.7, -3.92)
+script = ExtResource("1_cam")
+camera_id = &"hall_bureau"
+label = "Hall du bureau"
+
+[node name="CAM_11_Refectoire" type="Camera3D" parent="."]
+transform = Transform3D(-0.563744, -0.181113, 0.805848, -3.45721e-08, 0.975662, 0.219278, -0.82595, 0.123617, -0.550024, 23.52, 2.7, -26.32)
+script = ExtResource("1_cam")
+camera_id = &"refectoire"
+label = "Réfectoire"
+
+[node name="CAM_12_Couloir_Est" type="Camera3D" parent="."]
+transform = Transform3D(-0.999347, -0.00522535, 0.0357412, 1.53965e-07, 0.989481, 0.144666, -0.0361212, 0.144571, -0.988835, 30.52, 2.7, -9.52)
+script = ExtResource("1_cam")
+camera_id = &"couloir_est"
+label = "Couloir est"
+
+[node name="CAM_13_Couloir_Ouest" type="Camera3D" parent="."]
+transform = Transform3D(0.999419, 0.00465461, -0.0337517, -6.3437e-11, 0.990624, 0.136614, 0.0340712, -0.136535, 0.990049, -2.52, 2.7, -10.08)
+script = ExtResource("1_cam")
+camera_id = &"couloir_ouest"
+label = "Couloir ouest"
+
+[node name="CAM_14_Couloir_Sud_Est" type="Camera3D" parent="."]
+transform = Transform3D(-0.0196043, 0.079086, -0.996675, 1.1532e-09, 0.996867, 0.0791012, 0.999808, 0.00155072, -0.0195429, 22.68, 2.7, 1.68)
+script = ExtResource("1_cam")
+camera_id = &"couloir_sud_est"
+label = "Couloir sud-est"

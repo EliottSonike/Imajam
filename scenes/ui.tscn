@@ -1,40 +1,7 @@
 [gd_scene format=3 uid="uid://c7tp8kt2sphlh"]
 
 [ext_resource type="Script" uid="uid://d4ge6tvdklshu" path="res://scripts/ui/ui_root.gd" id="1_ggqni"]
-[ext_resource type="Script" uid="uid://dtc71dyc51cdv" path="res://scenes/panel.gd" id="2_oo4rv"]
 
 [node name="Ui" type="CanvasLayer" unique_id=978964736]
+process_mode = 3
 script = ExtResource("1_ggqni")
-
-[node name="Panel" type="Panel" parent="." unique_id=70184129]
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -637.0
-offset_top = -357.0
-offset_right = -37.0
-offset_bottom = 43.0
-grow_horizontal = 2
-grow_vertical = 2
-scale = Vector2(2, 2)
-size_flags_horizontal = 4
-mouse_filter = 2
-script = ExtResource("2_oo4rv")
-
-[node name="RichTextLabel" type="RichTextLabel" parent="Panel" unique_id=615030733]
-layout_mode = 0
-offset_left = 20.0
-offset_top = 20.0
-offset_right = 580.0
-offset_bottom = 320.0
-text = "test"
-
-[node name="fermerBoutton" type="Button" parent="Panel" unique_id=1708643801]
-layout_mode = 0
-offset_left = 250.0
-offset_top = 340.0
-offset_right = 350.0
-offset_bottom = 380.0
-text = "Fermer"

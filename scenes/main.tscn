@@ -1,25 +1,68 @@
 [gd_scene format=3 uid="uid://bxh6bqyadwjj7"]
 
 [ext_resource type="Script" uid="uid://bvdvhf4l4ipnn" path="res://scripts/game/turn_manager.gd" id="1"]
-[ext_resource type="PackedScene" uid="uid://dfocrrvqf6nxu" path="res://scenes/player.tscn" id="1_tipki"]
+[ext_resource type="PackedScene" uid="uid://ljju3hj10g8m" path="res://scenes/player.tscn" id="1_tipki"]
 [ext_resource type="Script" uid="uid://cl4g6mnwxt1kh" path="res://scripts/cameras/camera_system.gd" id="2"]
 [ext_resource type="Script" uid="uid://dpbrrxll6ywov" path="res://scripts/world/power_grid.gd" id="3"]
 [ext_resource type="PackedScene" uid="uid://b3qo55377yqgh" path="res://scenes/level.tscn" id="5_85g3d"]
 [ext_resource type="PackedScene" uid="uid://c7tp8kt2sphlh" path="res://scenes/ui.tscn" id="6_choun"]
 [ext_resource type="PackedScene" uid="uid://cx8ibjw75madh" path="res://scenes/props.tscn" id="7_ya4ey"]
 [ext_resource type="PackedScene" uid="uid://c88jyqqeyur4k" path="res://scenes/cameras.tscn" id="8_eb6dy"]
+[ext_resource type="Script" uid="uid://dd2usfn827l0j" path="res://scripts/prisoners/prisoner_hider.gd" id="9_p1"]
+[ext_resource type="Script" uid="uid://de44n10yjq002" path="res://scripts/prisoners/prisoner_crisis.gd" id="10_p2"]
+[ext_resource type="Script" uid="uid://b5dobaoahnko6" path="res://scripts/prisoners/prisoner_stalker.gd" id="11_p3"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_cellule1"]
+size = Vector3(4, 2, 3.5)
 
 [node name="Main" type="Node3D" unique_id=100031218]
 
 [node name="Player" parent="." unique_id=1665888107 instance=ExtResource("1_tipki")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 0)
 
 [node name="Prisoners" type="Node3D" parent="." unique_id=373514444]
 
+[node name="Prisoner1" type="Node3D" parent="Prisoners" unique_id=527919959 node_paths=PackedStringArray("cell_trigger", "cell_door", "hide_spot")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 3.9, 0, -25.3)
+script = ExtResource("9_p1")
+cell_trigger = NodePath("../Cellule1Zone")
+cell_door = NodePath("../../Props/PorteCellule1")
+hide_spot = NodePath("../Cachette1")
+prisoner_id = 1
+
+[node name="Cachette1" type="Marker3D" parent="Prisoners" unique_id=1446464509]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 1.85, 0, -22.85)
+
+[node name="Cellule1Zone" type="Area3D" parent="Prisoners" unique_id=1078457218]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 1, -24.75)
+collision_layer = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Prisoners/Cellule1Zone" unique_id=1814313133]
+shape = SubResource("BoxShape3D_cellule1")
+
+[node name="Prisoner2" type="Node3D" parent="Prisoners" unique_id=1629544543 node_paths=PackedStringArray("cell_door")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 43.2, 0, -4.9)
+script = ExtResource("10_p2")
+cell_door = NodePath("../../Props/PorteCellule2")
+prisoner_id = 2
+
+[node name="Prisoner3" type="Node3D" parent="Prisoners" unique_id=334595550 node_paths=PackedStringArray("cell_door", "generator_spot")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 14.7, 0, -12.3)
+script = ExtResource("11_p3")
+cell_door = NodePath("../../Props/PorteCellule3")
+generator_spot = NodePath("../PosteGenerateur")
+prisoner_id = 3
+
+[node name="PosteGenerateur" type="Marker3D" parent="Prisoners" unique_id=740625287]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 44, 0, -24.6)
+
 [node name="Systems" type="Node" parent="." unique_id=134388098]
 
-[node name="TurnManager" type="Node" parent="Systems" unique_id=2115943061]
+[node name="TurnManager" type="Node" parent="Systems" unique_id=2115943061 node_paths=PackedStringArray("prisoner_1", "prisoner_2", "prisoner_3")]
 script = ExtResource("1")
+prisoner_1 = NodePath("../../Prisoners/Prisoner1")
+prisoner_2 = NodePath("../../Prisoners/Prisoner2")
+prisoner_3 = NodePath("../../Prisoners/Prisoner3")
 
 [node name="CameraSystem" type="Node" parent="Systems" unique_id=364023903]
 script = ExtResource("2")
