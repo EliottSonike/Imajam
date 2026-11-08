@@ -369,12 +369,17 @@ func _cameras() -> void:
 	for c in cams:
 		var cam := c as SecurityCamera
 		var parts := String(cam.name).split("_")
-		if parts.size() < 2 or not parts[1].is_valid_int() or not boxes.has(parts[1].to_int()):
+		if parts.size() < 2 or not parts[1].is_valid_int():
 			continue
-		var box := boxes[parts[1].to_int()] as MeshInstance3D
-		box.visible = false
-		var centre := inv * (box.global_transform * box.get_aabb().get_center())
 		var fwd := (inv.basis * -cam.global_basis.z).normalized()
+		var centre: Vector3
+		if boxes.has(parts[1].to_int()):
+			var box := boxes[parts[1].to_int()] as MeshInstance3D
+			box.visible = false
+			centre = inv * (box.global_transform * box.get_aabb().get_center())
+		else:
+			# caméra ajoutée après le modèle de la prison (cuisines) : boîtier juste derrière l'objectif
+			centre = inv * cam.global_position - fwd * 0.32
 		var holder := Node3D.new()
 		holder.position = centre
 		holder.rotation = Vector3(0.0, atan2(-fwd.z, fwd.x), asin(clampf(fwd.y, -1.0, 1.0)))

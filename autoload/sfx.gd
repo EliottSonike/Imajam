@@ -12,6 +12,19 @@ var _voice: AudioStreamPlayer
 func stream(sound: String) -> AudioStream:
 	if not _cache.has(sound):
 		_cache[sound] = null
+		# variantes son_1, son_2… : une prise au hasard à chaque lecture (ex. les pas)
+		var variants: Array[AudioStream] = []
+		while ResourceLoader.exists("%s%s_%d.ogg" % [DIR, sound, variants.size() + 1]):
+			variants.append(load("%s%s_%d.ogg" % [DIR, sound, variants.size() + 1]))
+		if not variants.is_empty():
+			var r := AudioStreamRandomizer.new()
+			r.playback_mode = AudioStreamRandomizer.PLAYBACK_RANDOM_NO_REPEATS
+			r.random_pitch = 1.0
+			r.random_volume_offset_db = 1.5
+			for v in variants:
+				r.add_stream(-1, v)
+			_cache[sound] = r
+			return r
 		for ext in ["ogg", "wav", "mp3"]:  # un .ogg enregistré remplace le .wav du même nom
 			if ResourceLoader.exists(DIR + sound + "." + ext):
 				_cache[sound] = load(DIR + sound + "." + ext)

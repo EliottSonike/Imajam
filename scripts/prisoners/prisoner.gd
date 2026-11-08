@@ -144,6 +144,11 @@ func set_hidden_from_cameras(hidden: bool) -> void:
 		(vi as VisualInstance3D).layers = (1 << (HIDDEN_FROM_CAMERAS_LAYER - 1)) if hidden else 1
 
 
+## Déclenche le détecteur de mouvement des caméras.
+func shows_motion() -> bool:
+	return _moving and not resolved and not _busy
+
+
 func seen_on_screen() -> bool:
 	var sys := get_tree().get_first_node_in_group(&"camera_system") as CameraSystem
 	return sys != null and sys.active and camera_sees(sys.current_camera())

@@ -7,6 +7,7 @@ extends Interactable
 
 
 func _ready() -> void:
+	add_to_group(&"security_desk")
 	if prompt == "":
 		prompt = "Regarder les caméras"
 	_setup_box(size, box_offset)
