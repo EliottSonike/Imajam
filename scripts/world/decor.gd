@@ -1,46 +1,13 @@
 class_name Decor
 extends Node3D
 ## Habille le niveau : béton sur les murs, carrelage au réfectoire, écrans et téléphone du bureau.
+## Les meubles détaillés sont posés par Mobilier (scripts/world/mobilier.gd).
 
 const MAT_MUR := preload("res://assets/materials/beton_mur.tres")
 const MAT_REFECTOIRE := preload("res://assets/materials/carrelage_refectoire.tres")
 const SHADER_ECRAN := preload("res://assets/materials/ecran_cctv.gdshader")
 const ECRAN := preload("res://models/ecran.glb")
 const TELEPHONE := preload("res://models/telephone.glb")
-const LIT := preload("res://models/lit_hopital.glb")  # « Hospital Bed », loxfear, CC-BY 4.0
-const TABLE := preload("res://models/table_prison.glb")  # « Prison Table », chuZz, CC-BY 4.0
-const CASIER := preload("res://models/casier.glb")  # « Locker », neverfollow81, CC-BY 4.0
-
-## Meubles d'origine du modèle de la prison, remplacés par les modèles ci-dessus
-## (on ne cache que l'image : les collisions restent).
-const REMPLACES: Array[String] = ["Lit_Cellule", "Matelas_Cellule", "Lits_Infirmerie", "Matelas_Infirmerie",
-	"Tables_Refectoire", "Bancs_Refectoire", "Casiers_Vestiaire", "Armoire_Bureau", "Armoire_Medicaments_Infirmerie"]
-
-## Emplacements des meubles, dans le repère du modèle de la prison : [centre au sol, rotation Y en degrés].
-## Lits : tête du côté de l'oreiller d'origine.
-const LITS := [
-	[Vector3(9.24, 0, 2.51), -90.0],  # cellule 1
-	[Vector3(47.89, 0, 24.64), 180.0],  # cellule 2
-	[Vector3(20.44, 0, 15.11), -90.0],  # cellule 3
-	[Vector3(31.62, 0, 14.0), -90.0],  # infirmerie
-	[Vector3(31.62, 0, 16.7), -90.0],
-]
-const TABLES := [
-	[Vector3(20.75, 0, 3.5), 0.0], [Vector3(20.75, 0, 6.3), 0.0],
-	[Vector3(25.45, 0, 3.5), 0.0], [Vector3(25.45, 0, 6.3), 0.0],
-]
-## Rangées de casiers : [centre, rotation (porte vers la pièce), blocs] ; "3" = bloc de trois, "1" = casier seul.
-const CASIERS := [
-	[Vector3(10.16, 0, 26.59), 90.0, ["3", "1"]],  # vestiaire, mur ouest
-	[Vector3(11.89, 0, 29.05), 180.0, ["3", "3", "3"]],  # vestiaire, mur sud
-	[Vector3(1.81, 0, 26.2), 90.0, ["3"]],  # bureau
-	[Vector3(27.6, 0, 12.93), 0.0, ["3"]],  # infirmerie
-]
-const LIT_TAILLE := Vector2(2.0, 1.0)  # longueur, largeur
-const TABLE_LONGUEUR := 2.9
-const CASIER_HAUTEUR := 1.9
-const CASIER_COUPE := 57.0  # dans casier.glb, le bloc de trois est à gauche de cette abscisse, le casier seul à droite
-
 ## Les quatre écrans posés sur le bureau, légèrement tournés vers la chaise.
 const ECRANS_X: Array[float] = [-1.475, -0.475, 0.525, 1.525]
 const ECRANS_Z := 2.25
@@ -68,7 +35,10 @@ func _ready() -> void:
 		prison = get_parent().get_node_or_null("Prison") as Node3D
 	if prison:
 		_habiller(prison)
-		_meubler(prison)
+		var mobilier := Mobilier.new()
+		mobilier.name = "Mobilier"
+		mobilier.prison = prison
+		add_child(mobilier)
 	_poser_bureau()
 	Events.power_changed.connect(_on_power_changed)
 	Events.camera_mode_changed.connect(_on_camera_mode_changed)
@@ -83,9 +53,6 @@ func _habiller(root: Node) -> void:
 		if mi.name.begins_with("Ecrans_Bureau"):
 			mi.visible = false  # remplacés par les vrais écrans (la collision reste)
 			continue
-		if REMPLACES.any(func(n: String) -> bool: return mi.name.begins_with(n)):
-			mi.visible = false
-			continue
 		for i in mi.mesh.get_surface_count():
 			var mat := mi.mesh.surface_get_material(i)
 			if mat == null:
@@ -95,112 +62,6 @@ func _habiller(root: Node) -> void:
 					mi.set_surface_override_material(i, MAT_MUR)
 				"Sol_Refectoire":
 					mi.set_surface_override_material(i, MAT_REFECTOIRE)
-
-
-# --- Mobilier ----------------------------------------------------------------
-
-func _meubler(root: Node3D) -> void:
-	for l in LITS:
-		var lit := _caler(LIT.instantiate(), Vector3(LIT_TAILLE.x, 0.0, LIT_TAILLE.y), true)
-		_poser(root, lit, l[0], l[1])
-	for t in TABLES:
-		_poser(root, _caler(TABLE.instantiate(), Vector3(TABLE_LONGUEUR, 0.0, 0.0)), t[0], t[1])
-	var blocs := _blocs_casiers()
-	for r in CASIERS:
-		var rangee := Node3D.new()
-		var largeurs: Array[float] = []
-		var pieces: Array[Node3D] = []
-		for b in r[2]:
-			var piece := _caler((blocs[b] as Node3D).duplicate(), Vector3(0.0, CASIER_HAUTEUR, 0.0))
-			pieces.append(piece)
-			largeurs.append(_boite(piece).size.x)
-		var total := 0.0
-		for w in largeurs:
-			total += w
-		var x := -total / 2.0
-		for i in pieces.size():
-			pieces[i].position.x = x + largeurs[i] / 2.0
-			x += largeurs[i]
-			rangee.add_child(pieces[i])
-		_poser(root, rangee, r[0], r[1])
-
-
-func _poser(root: Node3D, n: Node3D, centre: Vector3, rot_y: float) -> void:
-	var holder := Node3D.new()
-	holder.position = centre
-	holder.rotation_degrees.y = rot_y
-	holder.add_child(n)
-	root.add_child(holder)
-
-
-## Met un modèle à la bonne taille (axe X = longueur), centré, posé au sol.
-## Une taille à 0 suit les autres (échelle uniforme) ; « libre » laisse la largeur (Z) suivre sa propre cible.
-func _caler(model: Node3D, cible: Vector3, libre := false) -> Node3D:
-	var wrap := Node3D.new()
-	wrap.add_child(model)
-	var a := _boite(model)
-	var k := 1.0
-	if cible.x > 0.0:
-		k = cible.x / a.size.x
-	elif cible.y > 0.0:
-		k = cible.y / a.size.y
-	var s := Vector3(k, k, k)
-	if libre and cible.z > 0.0:
-		s.z = cible.z / a.size.z
-	model.scale = s
-	model.position = -Vector3(a.get_center().x * s.x, a.position.y * s.y, a.get_center().z * s.z)
-	return wrap
-
-
-## Boîte englobante d'un modèle, dans son propre repère.
-func _boite(n: Node3D) -> AABB:
-	var box := AABB()
-	var first := true
-	for m in n.find_children("*", "MeshInstance3D", true, false):
-		var mi := m as MeshInstance3D
-		var t := Transform3D.IDENTITY
-		var p: Node = mi
-		while p != n and p != null:
-			t = (p as Node3D).transform * t
-			p = p.get_parent()
-		var b := t * mi.get_aabb()
-		box = b if first else box.merge(b)
-		first = false
-	return box
-
-
-## casier.glb contient un bloc de trois casiers et un casier seul dans le même maillage : on les sépare.
-func _blocs_casiers() -> Dictionary:
-	var src := CASIER.instantiate() as Node3D
-	var mi := src.find_children("*", "MeshInstance3D", true, false)[0] as MeshInstance3D
-	var t := Transform3D.IDENTITY
-	var p: Node = mi
-	while p != src and p != null:
-		t = (p as Node3D).transform * t
-		p = p.get_parent()
-	var out := {}
-	for cle in ["3", "1"]:
-		var mesh := ArrayMesh.new()
-		for si in mi.mesh.get_surface_count():
-			var arr := mi.mesh.surface_get_arrays(si)
-			var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
-			var idx: PackedInt32Array = arr[Mesh.ARRAY_INDEX]
-			var garde := PackedInt32Array()
-			for i in range(0, idx.size(), 3):
-				var c := t * ((v[idx[i]] + v[idx[i + 1]] + v[idx[i + 2]]) / 3.0)
-				if (c.x < CASIER_COUPE) == (cle == "3"):
-					garde.append_array([idx[i], idx[i + 1], idx[i + 2]])
-			arr[Mesh.ARRAY_INDEX] = garde
-			mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
-			mesh.surface_set_material(si, mi.mesh.surface_get_material(si))
-		var piece := MeshInstance3D.new()
-		piece.mesh = mesh
-		piece.transform = t
-		var n := Node3D.new()
-		n.add_child(piece)
-		out[cle] = n
-	src.free()
-	return out
 
 
 func _poser_bureau() -> void:

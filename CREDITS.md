@@ -1,12 +1,26 @@
 # Crédits
 
-## Modèles 3D tiers (licence CC-BY 4.0 — https://creativecommons.org/licenses/by/4.0/)
+## Modèles 3D tiers
 
-- **Hospital Bed** — loxfear — https://sketchfab.com/3d-models/hospital-bed-f8c13a19e84343e7b644c19f7b9488d3 (`models/lit_hopital.glb`)
-- **Prison Table** — chuZz — https://sketchfab.com/3d-models/prison-table-b5149983b2bd431ca76464aae36c9ec9 (`models/table_prison.glb`)
-- **Locker** — neverfollow81 — https://sketchfab.com/3d-models/casier-89701d9d701e431daa3968cd7c426efd (`models/casier.glb`)
+Licence CC-BY 4.0 (https://creativecommons.org/licenses/by/4.0/), sauf mention contraire.
 
-Modèles utilisés sans modification, mis à l'échelle dans le jeu ; le casier est séparé en deux blocs par `scripts/world/decor.gd`.
+| Modèle | Auteur | Fichier |
+|---|---|---|
+| Hospital Bed | loxfear | `models/lit_hopital.glb` |
+| Prison Table | chuZz | `models/table_prison.glb` |
+| Locker | neverfollow81 | `models/casier.glb` |
+| tabur | kesha62 | `models/tabouret.glb` |
+| Chaise de bureau | GwendolineR | `models/chaise_bureau.glb` |
+| Carton Box_05_Closed | Pixeled Bun | `models/carton.glb` |
+| Toilette | GNI-APALH | `models/toilettes.glb` |
+| Lavabo | Antonio Rossini (Rox3d) | `models/lavabo.glb` |
+| Industrial Switches Apollo Command Module | ntilted | `models/tableau_electrique.glb` |
+| Simple Generator (Fixed) | Blender3D | `models/groupe_electrogene.glb` |
+| Etagère | oooFFFFEDDMODELS | `models/etagere.glb` |
+| Security camera | Veebroush | `models/camera_surveillance.glb` — **licence Sketchfab Standard** (utilisable dans le jeu, mais pas de redistribution du modèle seul) |
+
+Tous les modèles viennent de Sketchfab. Leurs textures ont été réduites (`tools/optimize_glb.py`) ;
+le casier et la caméra sont découpés, et tous sont mis à l'échelle et placés par `scripts/world/mobilier.gd`.
 
 ## Polices (SIL Open Font License, Apache 2.0)
 
